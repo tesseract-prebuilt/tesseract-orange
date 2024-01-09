@@ -1,0 +1,25 @@
+# Docker Compose configuration file
+#
+# References:
+#
+# * Compose file version 3 reference | Docker Docs
+#   https://docs.docker.com/compose/compose-file/compose-file-v3/
+#
+# Copyright 2023 林博仁(Buo-ren, Lin) <Buo.Ren.Lin@gmail.com>
+# SPDX-License-Identifier: CC-BY-SA-4.0
+version: '3'
+
+name: tesseract-orange
+services:
+  builder:
+    container_name: tesseract-orange-builder
+    hostname: tesseract-orange-builder
+    image: ubuntu:jammy
+    volumes:
+      - ./:/project
+    command: sleep infinity
+    environment:
+      http_proxy:
+      https_proxy:
+      HTTP_PROXY:
+      HTTPS_PROXY:
