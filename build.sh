@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build optimized Tesseract OCR engine
+# Build optimized Tesseract OCR engine from source
 #
 # Copyright 2023 林博仁 <buo.ren.lin@gmail.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
