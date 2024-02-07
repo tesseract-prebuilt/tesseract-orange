@@ -4,6 +4,11 @@
 # Copyright 2023 林博仁 <buo.ren.lin@gmail.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
+init(){
+    print_progress \
+        'Operation completed without errors.'
+}
+
 set \
     -o errexit \
     -o errtrace \
@@ -42,3 +47,5 @@ if test -v BASH_SOURCE; then
         script_name="${script_filename%%.*}"
     }
 fi
+
+init
