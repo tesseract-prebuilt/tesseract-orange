@@ -9,6 +9,39 @@ init(){
         'Operation completed without errors.'
 }
 
+print_progress(){
+    local progress_msg="${1}"; shift
+
+    local separator_string=
+    local -i separator_length
+
+    # NOTE: COLUMNS shell variable is not available in
+    # non-noninteractive shell
+    # FIXME: This calculation is not correct for double-width characters
+    # (e.g. 中文)
+    # https://www.reddit.com/r/bash/comments/gynqa0/how_to_determine_character_width_for_special/
+    separator_length="${#progress_msg}"
+
+    # Reduce costly I/O operations
+    local -i separator_blocks separator_remain_units
+    separator_blocks="$(( separator_length / 10 ))"
+    separator_remain_units="$(( separator_length % 10 ))"
+
+    local -i i j
+    for ((i = 0; i < separator_blocks; i = i + 1)); do
+        separator_string+='=========='
+    done
+    for ((j = 0; j < separator_remain_units; j = j + 1)); do
+        separator_string+='='
+    done
+
+    printf \
+        '\n%s\n%s\n%s\n' \
+        "${separator_string}" \
+        "${progress_msg}" \
+        "${separator_string}"
+}
+
 set \
     -o errexit \
     -o errtrace \
