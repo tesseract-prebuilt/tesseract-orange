@@ -23,6 +23,16 @@ init(){
         exit 2
     fi
 
+    local cache_dir="${script_dir}/cache"
+    if ! test -d "${cache_dir}"; then
+        if ! mkdir "${cache_dir}"; then
+            printf \
+                'Error: Unable to create the cache directory.\n' \
+                1>&2
+            exit 2
+        fi
+    fi
+
     print_progress \
         'Operation completed without errors.'
 }
