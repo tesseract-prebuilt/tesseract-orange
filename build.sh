@@ -33,6 +33,26 @@ init(){
         fi
     fi
 
+    local operation_timestamp
+    if ! operation_timestamp="$(date +%Y%m%d-%H%M%S)"; then
+        printf \
+            'Error: Unable to query the operation timestamp.\n' \
+            1>&2
+        exit 2
+    fi
+
+    if ! temp_dir="$(
+        mktemp \
+            --tmpdir \
+            --directory \
+            "${script_name}-${operation_timestamp}.XXXXXX"
+        )"; then
+        printf \
+            'Error: Unable to create the temporary directory.\n' \
+            1>&2
+        exit 2
+    fi
+
     print_progress \
         'Operation completed without errors.'
 }
@@ -258,6 +278,23 @@ prepare_software_sources(){
     fi
 }
 
+# Operations done when the program is terminating
+trap_exit(){
+    if test -v temp_dir && test -e "${temp_dir}"; then
+        if ! rm -rf "${temp_dir}"; then
+            printf \
+                'Warning: Unable to clean up the temporary directory.\n' \
+                1>&2
+        fi
+    fi
+}
+if ! trap trap_exit EXIT; then
+    printf \
+        'Error: Unable to set the EXIT trap.\n' \
+        1>&2
+    exit 2
+fi
+
 set \
     -o errexit \
     -o errtrace \
@@ -296,5 +333,9 @@ if test -v BASH_SOURCE; then
         script_name="${script_filename%%.*}"
     }
 fi
+
+# NOTE: This variable must in global scope in order the EXIT trap to
+# work
+temp_dir=
 
 init
