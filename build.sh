@@ -19,6 +19,19 @@ init(){
 # print progress report message with additional styling
 print_progress(){
     local progress_msg="${1}"; shift
+    local separator_char
+    if test "${#}" -gt 0; then
+        if test "${#separator_char}" -ne 1; then
+            printf -- \
+                '%s: FATAL: The separator_char positional parameter only accept a single character as its argument.\n' \
+                "${FUNCNAME[0]}" \
+                1>&2
+            exit 99
+        fi
+        separator_char="${1}"; shift
+    else
+        separator_char=-
+    fi
 
     local separator_string=
     local -i separator_length
@@ -31,16 +44,23 @@ print_progress(){
     separator_length="${#progress_msg}"
 
     # Reduce costly I/O operations
-    local -i separator_blocks separator_remain_units
-    separator_blocks="$(( separator_length / 10 ))"
-    separator_remain_units="$(( separator_length % 10 ))"
+    local separator_block_string=
+    local -i \
+        separator_block_length=10 \
+        separator_blocks \
+        separator_remain_units
+    separator_blocks="$(( separator_length / separator_block_length ))"
+    separator_remain_units="$(( separator_length % separator_block_length ))"
 
-    local -i i j
-    for ((i = 0; i < separator_blocks; i = i + 1)); do
-        separator_string+='=========='
+    local -i i j k
+    for ((i = 0; i < separator_block_length; i = i + 1)); do
+        separator_block_string+="${separator_char}"
     done
-    for ((j = 0; j < separator_remain_units; j = j + 1)); do
-        separator_string+='='
+    for ((j = 0; j < separator_blocks; j = j + 1)); do
+        separator_string+="${separator_block_string}"
+    done
+    for ((k = 0; k < separator_remain_units; k = k + 1)); do
+        separator_string+="${separator_char}"
     done
 
     printf \
