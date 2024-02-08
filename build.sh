@@ -5,6 +5,10 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 init(){
+    print_progress \
+        'Tesseract Orange product build program' \
+        =
+
     if ! check_runtime_parameters; then
         printf \
             'Error: The runtime parameter check has failed.\n' \
