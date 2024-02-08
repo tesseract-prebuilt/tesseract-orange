@@ -37,7 +37,7 @@ print_progress(){
     local progress_msg="${1}"; shift
     local separator_char
     if test "${#}" -gt 0; then
-        if test "${#separator_char}" -ne 1; then
+        if test "${#1}" -ne 1; then
             printf -- \
                 '%s: FATAL: The separator_char positional parameter only accept a single character as its argument.\n' \
                 "${FUNCNAME[0]}" \
