@@ -16,6 +16,7 @@ init(){
         'Operation completed without errors.'
 }
 
+# print progress report message with additional styling
 print_progress(){
     local progress_msg="${1}"; shift
 
