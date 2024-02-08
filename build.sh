@@ -17,6 +17,11 @@ init(){
 }
 
 # print progress report message with additional styling
+#
+# Positional parameters:
+#
+# progress_msg: Progress report message text
+# separator_char: Character used in the separator
 print_progress(){
     local progress_msg="${1}"; shift
     local separator_char
