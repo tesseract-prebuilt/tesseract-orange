@@ -5,6 +5,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 init(){
+    if ! check_runtime_parameters; then
+        printf \
+            'Error: The runtime parameter check has failed.\n' \
+            1>&2
+        exit 1
+    fi
+
     print_progress \
         'Operation completed without errors.'
 }
@@ -40,6 +47,17 @@ print_progress(){
         "${separator_string}" \
         "${progress_msg}" \
         "${separator_string}"
+}
+
+check_runtime_parameters(){
+    print_progress 'Checking the runtime parameters of this program...'
+    printf 'Info: Checking running user...\n'
+    if test "${EUID}" -ne 0; then
+        printf \
+            'Error: This program requires to be run as the superuser(root).\n' \
+            1>&2
+        return 2
+    fi
 }
 
 set \
