@@ -64,6 +64,17 @@ init(){
             "${temp_dir}"
     fi
 
+    print_progress 'Creating the source and build base directories...'
+    local \
+        source_basedir="${temp_dir}/source" \
+        build_basedir="${temp_dir}/build"
+    if ! mkdir --verbose "${source_basedir}" "${build_basedir}"; then
+        printf \
+            'Error: Unable to create the source and build base directory.\n' \
+            1>&2
+        exit 2
+    fi
+
     print_progress \
         'Operation completed without errors.'
 }
