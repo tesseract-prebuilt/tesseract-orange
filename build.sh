@@ -25,6 +25,7 @@ init(){
 
     local cache_dir="${script_dir}/cache"
     if ! test -d "${cache_dir}"; then
+        print_progress 'Creating the cache directory...'
         if ! mkdir "${cache_dir}"; then
             printf \
                 'Error: Unable to create the cache directory.\n' \
@@ -33,14 +34,20 @@ init(){
         fi
     fi
 
+    print_progress 'Determining the operation timestamp...'
     local operation_timestamp
     if ! operation_timestamp="$(date +%Y%m%d-%H%M%S)"; then
         printf \
             'Error: Unable to query the operation timestamp.\n' \
             1>&2
         exit 2
+    else
+        printf \
+            'Info: Operation timestamp determined to be "%s".\n' \
+            "${operation_timestamp}"
     fi
 
+    print_progress 'Creating the temporary directory for build intermediate files...'
     if ! temp_dir="$(
         mktemp \
             --tmpdir \
@@ -51,6 +58,10 @@ init(){
             'Error: Unable to create the temporary directory.\n' \
             1>&2
         exit 2
+    else
+        printf \
+            'Info: "%s" temporary directory created.\n' \
+            "${temp_dir}"
     fi
 
     print_progress \
