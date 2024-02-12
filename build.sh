@@ -167,7 +167,7 @@ prepare_software_sources(){
     export DEBIAN_FRONTEND=noninteractive
 
     base_runtime_dependency_pkgs=(
-        wget
+        curl
     )
     if ! dpkg -s "${base_runtime_dependency_pkgs[@]}" &>/dev/null; then
         printf \
@@ -186,16 +186,17 @@ prepare_software_sources(){
     if ! test -v CI; then
         printf \
             'Info: Detecting local region code...\n'
-        wget_opts=(
-            # Output to the standard output device
-            --output-document=-
+        curl_opts=(
+            # Return non-zero exit status when HTTP error occurs
+            --fail
 
-            # Don't output debug messages
-            --quiet
+            # Do not show progress meter but keep error messages
+            --silent
+            --show-error
         )
         if ! ip_reverse_lookup_service_response="$(
-                wget \
-                    "${wget_opts[@]}" \
+                curl \
+                    "${curl_opts[@]}" \
                     https://ipinfo.io/json
             )"; then
             printf \
@@ -230,16 +231,17 @@ prepare_software_sources(){
 
             printf \
                 'Info: Checking whether the local Ubuntu archive mirror exists...\n'
-            wget_opts=(
-                # Output to the standard output device
-                --output-document=-
+            curl_opts=(
+                # Return non-zero exit status when HTTP error occurs
+                --fail
 
-                # Don't output debug messages
-                --quiet
+                # Do not show progress meter but keep error messages
+                --silent
+                --show-error
             )
             if ! \
-                wget \
-                    "${wget_opts[@]}" \
+                curl \
+                    "${curl_opts[@]}" \
                     "http://${region_code}.archive.ubuntu.com" \
                     >/dev/null; then
                 printf \
