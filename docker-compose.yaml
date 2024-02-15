@@ -19,6 +19,11 @@ services:
       - type: bind
         source: ./
         target: /project
+      # Sync timezone preference from the host system
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
     command: sleep infinity
     environment:
       http_proxy:
