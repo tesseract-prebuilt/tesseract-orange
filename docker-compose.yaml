@@ -16,7 +16,9 @@ services:
     hostname: tesseract-orange-builder
     image: ubuntu:jammy
     volumes:
-      - ./:/project
+      - type: bind
+        source: ./
+        target: /project
     command: sleep infinity
     environment:
       http_proxy:
