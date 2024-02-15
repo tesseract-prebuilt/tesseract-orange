@@ -2,10 +2,10 @@
 #
 # References:
 #
-# * Compose file version 3 reference | Docker Docs
-#   https://docs.docker.com/compose/compose-file/compose-file-v3/
+# * Compose Specification | Compose file reference | Reference | Docker Docs
+#   https://docs.docker.com/compose/compose-file/
 #
-# Copyright 2023 林博仁(Buo-ren, Lin) <Buo.Ren.Lin@gmail.com>
+# Copyright 2024 林博仁(Buo-ren, Lin) <Buo.Ren.Lin@gmail.com>
 # SPDX-License-Identifier: CC-BY-SA-4.0
 version: '3'
 
