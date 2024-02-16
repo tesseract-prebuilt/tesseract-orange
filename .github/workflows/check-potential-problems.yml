@@ -61,3 +61,22 @@ jobs:
           chat: '@brlin_project_ci_results'
           token: ${{ secrets.telegram_bot_api_token_ci }}
           status: ${{ job.status }}
+
+  check-product-build-program:
+    name: Check whether the product build program is runnable
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out content from the Git repository
+        uses: actions/checkout@v4
+
+      - name: Run the static analysis programs
+        run: |
+          sudo ./build.sh
+
+      - name: Send CI result notification to the Telegram channel
+        uses: yanzay/notify-telegram@v0.1.0
+        if: always()
+        with:
+          chat: '@brlin_project_ci_results'
+          token: ${{ secrets.telegram_bot_api_token_ci }}
+          status: ${{ job.status }}
