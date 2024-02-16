@@ -69,7 +69,7 @@ jobs:
       - name: Check out content from the Git repository
         uses: actions/checkout@v4
 
-      - name: Run the static analysis programs
+      - name: Run the product build program
         run: |
           sudo ./build.sh
 
