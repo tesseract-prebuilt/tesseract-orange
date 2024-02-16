@@ -217,6 +217,12 @@ print_progress(){
         separator_string+="${separator_char}"
     done
 
+    if test "${separator_char}" != '='; then
+        # For intermediate progresses prepend additional blank line to
+        # separate from previous outputs
+        printf '\n'
+    fi
+
     printf \
         '\n%s\n%s\n%s\n' \
         "${separator_string}" \
