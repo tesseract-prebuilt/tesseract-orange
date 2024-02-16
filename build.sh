@@ -3,6 +3,7 @@
 #
 # Copyright 2023 林博仁 <buo.ren.lin@gmail.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
+TESSERACT_VERSION="${TESSERACT_VERSION:-latest}"
 
 init(){
     print_progress \
@@ -75,8 +76,89 @@ init(){
         exit 2
     fi
 
+    print_progress 'Determining which Tesseract version to build...'
+    local tesseract_version
+    if test "${TESSERACT_VERSION}" == latest; then
+        if ! query_latest_tesseract_version_ensure_dependencies; then
+            printf \
+                'Error: Unable to ensure the runtime dependencies for the query_latest_tesseract_version function.\n' \
+                1>&2
+            exit 2
+        fi
+
+        tesseract_version="$(query_latest_tesseract_version)"
+        printf \
+            'Info: Will build current latest version of Tesseract("%s") determined from the GitHub References API response.\n' \
+            "${tesseract_version}"
+    else
+        tesseract_version="${TESSERACT_VERSION}"
+        printf \
+            'Info: Will build version "%s" of Tesseract specified from the TESSERACT_VERSION environment variable.\n' \
+            "${tesseract_version}"
+    fi
+
     print_progress \
         'Operation completed without errors.'
+}
+
+query_latest_tesseract_version_ensure_dependencies(){
+    local -a runtime_dependency_pkgs=(
+        curl
+        jq
+    )
+    if ! dpkg --status "${runtime_dependency_pkgs[@]}" &>/dev/null; then
+        printf \
+            'Info: Installing runtime dependencies for the query_latest_tesseract_version function...\n'
+        if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
+            printf \
+                'Error: Unable to install the runtime dependencies packages for the query_latest_tesseract_version function.\n' \
+                1>&2
+            return 2
+        fi
+    fi
+}
+
+# Determine tesseract version to be built (when TESSERACT_VERSION is set
+# to "auto") by calling the GitHub APIs
+#
+# Standard output: version to be built(without the `v` prefix)
+query_latest_tesseract_version(){
+    local -a curl_opts=(
+        --request GET
+        --header 'X-GitHub-Api-Version: 2022-11-28'
+        --header 'Accept: application/vnd.github+json'
+        --header 'User-Agent: Tesseract Orange Builder <https://gitlab.com/tesseract-prebuilt/tesseract-orange/-/issues>'
+
+        --silent
+        --show-error
+    )
+    if ! github_list_matching_references_response="$(
+        curl "${curl_opts[@]}" https://api.github.com/repos/tesseract-ocr/tesseract/git/matching-refs/tags/
+        )"; then
+        printf \
+            'Error: Unable to query the Tesseract repository Git tag list information from GitHub.\n' \
+            1>&2
+        return 1
+    fi
+
+    local last_git_tag_reference
+    local -a jq_opts=(
+        --raw-output
+    )
+    if ! last_git_tag_reference="$(
+        jq \
+            "${jq_opts[@]}" \
+            '.[-1].ref' \
+            <<<"${github_list_matching_references_response}"
+        )"; then
+        printf \
+            'Error: Unable to parse out the last Git tag reference name from the Git tag list information.\n' \
+            1>&2
+        return 1
+    fi
+
+    local last_git_tag="${last_git_tag_reference##*/}"
+    printf -- '%s' "${last_git_tag}"
 }
 
 # print progress report message with additional styling
