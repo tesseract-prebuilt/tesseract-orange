@@ -27,7 +27,11 @@ init(){
     local cache_dir="${script_dir}/cache"
     if ! test -d "${cache_dir}"; then
         print_progress 'Creating the cache directory...'
-        if ! mkdir "${cache_dir}"; then
+        local -a mkdir_opts=(
+            # Print progress report messages for better transparency
+            --verbose
+        )
+        if ! mkdir "${mkdir_opts[@]}" "${cache_dir}"; then
             printf \
                 'Error: Unable to create the cache directory.\n' \
                 1>&2
