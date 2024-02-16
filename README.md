@@ -21,6 +21,8 @@ A Tesseract version number that is available from the Git repository tags (witho
 
 ## Reference
 
+Here are some third-party resources that are referenced during the development of this product:
+
 * [tesseract-ocr/tesseract: Tesseract Open Source OCR Engine (main repository)](https://github.com/tesseract-ocr/tesseract)  
   The upstream project site
 * [Tesseract documentation | Tesseract OCR](https://tesseract-ocr.github.io/)  
