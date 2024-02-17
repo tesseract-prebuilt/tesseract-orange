@@ -58,6 +58,8 @@ Here are some third-party resources that are referenced during the development o
   The upstream project site.
 * [Tesseract documentation | Tesseract OCR](https://tesseract-ocr.github.io/)  
   The upstream documentation site.
+* [Compose Specification | Compose file reference | Reference | Docker Docs](https://docs.docker.com/compose/compose-file/)  
+  For information of instantiating and configuring the product builder container
 * [Getting started with the REST API - GitHub Docs](https://docs.github.com/en/rest/using-the-rest-api/getting-started-with-the-rest-api?apiVersion=2022-11-28)  
   For information regarding how to (properly) interact with the GitHub REST APIs.
 
