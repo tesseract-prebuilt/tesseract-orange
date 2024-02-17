@@ -15,6 +15,27 @@ Here are some prominent features of this product that worth noticing:
 * No files will be installed in the standard system paths, thus your runtime environment will also not be polluted, the installation can be easily cleaned up when not used
 * The built software is packaged in a highly-compressed tar archive, bundled with installer program to make ease of (re-)installation
 
+## Prerequisites
+
+This section documents some prerequisites of the usage of this product:
+
+### Build host
+
+This section documents the prerequisites of the host machine that runs [the build environment](#builder-container) of the product (which should also be the one that runs the built product):
+
+* A recent version of the Docker Engine (or equivalent counterparts) software installation  
+  For running the container for running the product build program(A.K.A. [the "Builder container"](#builder-container))
+* A recent version of the Docker Compose container orchestration utility(or its equivalent counterparts)
+
+### Builder container
+
+This section documents the prerequisites of the product building container:
+
+* GNU Bash  
+  The runtime interpreter of the build program.  **Requires version >= 4.3**(name reference variable support to be specific).
+* Ubuntu 22.04  
+  The operating system image of the builder container, other recent versions of Ubuntu/Debian may be compatible but those are not tested as of now.  Other Linux distributions may be supported if there's a large userbase(patches welcome!)
+
 ## Environment variables that will change the prodoct builder's behavior
 
 ### TESSERACT_VERSION
