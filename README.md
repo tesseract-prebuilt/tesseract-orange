@@ -23,9 +23,9 @@ This section documents some prerequisites of the usage of this product:
 
 This section documents the prerequisites of the host machine that runs [the build environment](#builder-container) of the product (which should also be the one that runs the built product):
 
-* A recent version of the Docker Engine (or equivalent counterparts) software installation  
-  For running the container for running the product build program(A.K.A. [the "Builder container"](#builder-container))
-* A recent version of the Docker Compose container orchestration utility(or its equivalent counterparts)
+* Docker Engine (or equivalent counterparts) software installation  
+  For running the container for running the product build program(A.K.A. [the "Builder container"](#builder-container)).  A recent version of the software should suffice.
+* A recent version of the Docker Compose container orchestration utility(or its equivalent counterparts).  A recent version that supports [version 3 of the Compose file specification](https://docs.docker.com/compose/compose-file/) should suffice.
 
 ### Builder container
 
