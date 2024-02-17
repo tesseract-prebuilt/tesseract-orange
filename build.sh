@@ -274,7 +274,7 @@ prepare_software_sources(){
     # Silence warnings regarding unavailable debconf frontends
     export DEBIAN_FRONTEND=noninteractive
 
-    base_runtime_dependency_pkgs=(
+    local -a base_runtime_dependency_pkgs=(
         curl
     )
     if ! dpkg -s "${base_runtime_dependency_pkgs[@]}" &>/dev/null; then
@@ -294,7 +294,7 @@ prepare_software_sources(){
     if ! test -v CI; then
         printf \
             'Info: Detecting local region code...\n'
-        curl_opts=(
+        local -a curl_opts=(
             # Return non-zero exit status when HTTP error occurs
             --fail
 
@@ -312,7 +312,7 @@ prepare_software_sources(){
                 1>&2
             region_code=
         else
-            grep_opts=(
+            local -a grep_opts=(
                 --perl-regexp
                 --only-matching
             )
@@ -339,7 +339,7 @@ prepare_software_sources(){
 
             printf \
                 'Info: Checking whether the local Ubuntu archive mirror exists...\n'
-            curl_opts=(
+            local -a curl_opts=(
                 # Return non-zero exit status when HTTP error occurs
                 --fail
 
