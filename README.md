@@ -7,6 +7,14 @@ Provides reproducible Tesseract build optimized for your machine.
 
 This project features programs that will download, and build a Tesseract OCR software that is highly-optimized to your host machine.
 
+## Features
+
+Here are some prominent features of this product that worth noticing:
+
+* The build is run in a Docker container, thus will not pollute your host system
+* No files will be installed in the standard system paths, thus your runtime environment will also not be polluted, the installation can be easily cleaned up when not used
+* The built software is packaged in a highly-compressed tar archive, bundled with installer program to make ease of (re-)installation
+
 ## Environment variables that will change the prodoct builder's behavior
 
 ### TESSERACT_VERSION
