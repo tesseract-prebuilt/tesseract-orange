@@ -398,12 +398,6 @@ trap_exit(){
         fi
     fi
 }
-if ! trap trap_exit EXIT; then
-    printf \
-        'Error: Unable to set the EXIT trap.\n' \
-        1>&2
-    exit 2
-fi
 
 set \
     -o errexit \
@@ -412,6 +406,9 @@ set \
 
 required_commands=(
     realpath
+
+    # Used in EXIT trap
+    rm
 )
 flag_dependency_check_failed=false
 for required_command in "${required_commands[@]}"; do
@@ -427,6 +424,13 @@ if test "${flag_dependency_check_failed}" == true; then
     printf \
         'Error: Dependency check failed, please check your installation.\n' \
         1>&2
+fi
+
+if ! trap trap_exit EXIT; then
+    printf \
+        'Error: Unable to set the EXIT trap.\n' \
+        1>&2
+    exit 2
 fi
 
 if test -v BASH_SOURCE; then
