@@ -238,6 +238,27 @@ check_runtime_parameters(){
 prepare_software_sources(){
     print_progress 'Preparing software sources...'
 
+    # Silence warnings regarding unavailable debconf frontends
+    export DEBIAN_FRONTEND=noninteractive
+
+    local -a base_runtime_dependency_pkgs=(
+        coreutils
+        curl
+    )
+    if ! dpkg -s "${base_runtime_dependency_pkgs[@]}" &>/dev/null; then
+        printf \
+            'Info: Installing base runtime dependency packages...\n'
+        if ! \
+            apt-get install \
+                -y \
+                "${base_runtime_dependency_pkgs[@]}"; then
+            printf \
+                'Error: Unable to install the base runtime dependency packages.\n' \
+                1>&2
+            return 2
+        fi
+    fi
+
     local apt_archive_cache_mtime_epoch
     if ! apt_archive_cache_mtime_epoch="$(
         stat \
@@ -266,26 +287,6 @@ prepare_software_sources(){
         if ! apt-get update; then
             printf \
                 'Error: Unable to refresh the APT local package cache.\n' \
-                1>&2
-            return 2
-        fi
-    fi
-
-    # Silence warnings regarding unavailable debconf frontends
-    export DEBIAN_FRONTEND=noninteractive
-
-    local -a base_runtime_dependency_pkgs=(
-        curl
-    )
-    if ! dpkg -s "${base_runtime_dependency_pkgs[@]}" &>/dev/null; then
-        printf \
-            'Info: Installing base runtime dependency packages...\n'
-        if ! \
-            apt-get install \
-                -y \
-                "${base_runtime_dependency_pkgs[@]}"; then
-            printf \
-                'Error: Unable to install the base runtime dependency packages.\n' \
                 1>&2
             return 2
         fi
