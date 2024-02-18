@@ -238,6 +238,28 @@ check_runtime_parameters(){
 prepare_software_sources(){
     print_progress 'Preparing software sources...'
 
+    local -a required_commands=(
+        apt-get
+    )
+    local required_command_check_failed=false
+    for command in "${required_commands[@]}"; do
+        if ! command -v "${command}" >/dev/null; then
+            printf \
+                '%s: Error: This function requires the "%s" command to be available in your command search PATHs.\n' \
+                "${FUNCNAME[0]}" \
+                "${command}" \
+                1>&2
+            required_command_check_failed=true
+        fi
+    done
+    if test "${required_command_check_failed}" == true; then
+        printf \
+            '%s: Error: Required command check failed.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 1
+    fi
+
     # Silence warnings regarding unavailable debconf frontends
     export DEBIAN_FRONTEND=noninteractive
 
