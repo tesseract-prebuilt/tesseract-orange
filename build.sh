@@ -259,6 +259,12 @@ prepare_software_sources(){
 
     local -a required_commands=(
         apt-get
+
+        # For determining the current time
+        date
+
+        # For determining the APT local cache creation time
+        stat
     )
     local required_command_check_failed=false
     for command in "${required_commands[@]}"; do
@@ -281,24 +287,6 @@ prepare_software_sources(){
 
     # Silence warnings regarding unavailable debconf frontends
     export DEBIAN_FRONTEND=noninteractive
-
-    local -a base_runtime_dependency_pkgs=(
-        coreutils
-        curl
-    )
-    if ! dpkg -s "${base_runtime_dependency_pkgs[@]}" &>/dev/null; then
-        printf \
-            'Info: Installing base runtime dependency packages...\n'
-        if ! \
-            apt-get install \
-                -y \
-                "${base_runtime_dependency_pkgs[@]}"; then
-            printf \
-                'Error: Unable to install the base runtime dependency packages.\n' \
-                1>&2
-            return 2
-        fi
-    fi
 
     local apt_archive_cache_mtime_epoch
     if ! apt_archive_cache_mtime_epoch="$(
