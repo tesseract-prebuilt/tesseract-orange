@@ -62,6 +62,8 @@ Here are some third-party resources that are referenced during the development o
   For information of instantiating and configuring the product builder container
 * [Getting started with the REST API - GitHub Docs](https://docs.github.com/en/rest/using-the-rest-api/getting-started-with-the-rest-api?apiVersion=2022-11-28)  
   For information regarding how to (properly) interact with the GitHub REST APIs.
+* [Content-Disposition - HTTP | MDN](https://developer.mozilla.org/en-US/docs/web/http/headers/content-disposition)  
+  Explain the usage and values of the `Content-Disposition` HTTP header.
 
 ## Licensing
 
