@@ -632,6 +632,14 @@ prepare_software_sources(){
 }
 
 determine_url_download_filename_ensure_deps(){
+    if ! check_package_manager_commands; then
+        printf \
+            '%s: Error: Package manager command check failed.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 1
+    fi
+
     local -a runtime_dependency_pkgs=(
         # For sending HTTP requests
         curl
