@@ -65,9 +65,17 @@ jobs:
   check-product-build-program:
     name: Check whether the product build program is runnable
     runs-on: ubuntu-22.04
+    env:
+      CACHE_DIR: ${{ github.workspace }}/cache
     steps:
       - name: Check out content from the Git repository
         uses: actions/checkout@v4
+
+      - name: Configure cache directory cache to speed up continuous integration
+        uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-cache-dir
+          path: ${{ env.CACHE_DIR }}
 
       - name: Run the product build program
         run: |

@@ -35,6 +35,13 @@ build-product:
     - if: $CI_COMMIT_TAG == null
   needs: []
   image: ubuntu:22.04
+  variables:
+    CACHE_DIR: ${CI_PROJECT_DIR}/cache
+  cache:
+    # Enable per-job and per-branch caching
+    key: $CI_JOB_NAME-$CI_COMMIT_REF_SLUG
+    paths:
+      - ${CACHE_DIR}
   script:
     - ./build.sh
 
