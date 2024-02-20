@@ -645,15 +645,55 @@ determine_url_download_filename_ensure_deps(){
         # For matching HTTP response headers
         grep
     )
-    if ! dpkg --status "${runtime_dependency_pkgs[@]}" &>/dev/null; then
+
+    local runtime_dependency_packages_missing=false
+    local distro_id
+    if ! distro_id="$(get_distro_identifier)"; then
+        printf \
+            '%s: Error: Unable to query the operating system distribution identifier.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 2
+    fi
+
+    case "${distro_id}" in
+        debian|ubuntu)
+            if ! dpkg --status "${runtime_dependency_pkgs[@]}" &>/dev/null; then
+                runtime_dependency_packages_missing=true
+            fi
+        ;;
+        *)
+            printf \
+                '%s: Error: Operating system distribution(ID=%s) not supported.\n' \
+                "${FUNCNAME[0]}" \
+                "${distro_id}" \
+                1>&2
+            return 1
+        ;;
+    esac
+
+    if test "${runtime_dependency_packages_missing}" == true; then
         printf \
             'Info: Installing the runtime dependency packages for the determine_url_download_filename function...\n'
-        if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
-            printf \
-                'Error: Unable to install the runtime dependency packages for the determine_url_download_filename function.\n' \
-                1>&2
-            return 2
-        fi
+
+        case "${distro_id}" in
+            debian|ubuntu)
+                if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
+                    printf \
+                        'Error: Unable to install the runtime dependency packages for the determine_url_download_filename function.\n' \
+                        1>&2
+                    return 2
+                fi
+            ;;
+            *)
+                printf \
+                    '%s: Error: Operating system distribution(ID=%s) not supported.\n' \
+                    "${FUNCNAME[0]}" \
+                    "${distro_id}" \
+                    1>&2
+                return 1
+            ;;
+        esac
     fi
 }
 
