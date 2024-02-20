@@ -373,7 +373,7 @@ check_runtime_parameters(){
             return 2
         fi
         printf \
-            'Info: The running user is acceptible(%s)\n' \
+            'Info: The running user is acceptible(%s).\n' \
             "${running_user}"
     fi
 }
