@@ -334,12 +334,49 @@ print_progress(){
 
 check_runtime_parameters(){
     print_progress 'Checking the runtime parameters of this program...'
+
+    local -a required_commands=(
+        # For querying the current username
+        whoami
+    )
+    local required_command_check_failed=false
+    for command in "${required_commands[@]}"; do
+        if ! command -v "${command}" >/dev/null; then
+            printf \
+                '%s: Error: This function requires the "%s" command to be available in your command search PATHs.\n' \
+                "${FUNCNAME[0]}" \
+                "${command}" \
+                1>&2
+            required_command_check_failed=true
+        fi
+    done
+    if test "${required_command_check_failed}" == true; then
+        printf \
+            '%s: Error: Required command check failed.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 1
+    fi
+
     printf 'Info: Checking running user...\n'
     if test "${EUID}" -ne 0; then
         printf \
             'Error: This program requires to be run as the superuser(root).\n' \
             1>&2
         return 2
+    else
+        local running_user
+        if ! running_user="$(whoami)"; then
+            printf \
+                "Error: Unable to query the runnning user's username.\\n" \
+                1>&2
+            return 2
+        fi
+        printf \
+            'Info: The running user is acceptible(%s)\n' \
+            "${running_user}"
+    fi
+
     fi
 }
 
