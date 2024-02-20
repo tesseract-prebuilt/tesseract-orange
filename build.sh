@@ -631,20 +631,7 @@ prepare_software_sources(){
     fi
 }
 
-# Determine the actual download filename from the given URL, if the
-# remote server does not hint the download filename, determine it from
-# the URL or fail if the URL does not look like containing the download
-# filename
-#
-# Standard output: Determined filename
-# Return values:
-#
-# * 0 - Success
-# * 1 - Prerequisite error
-# * 2 - Generic error
-determine_url_download_filename(){
-    local download_url="${1}"; shift
-
+determine_url_download_filename_ensure_deps(){
     local -a runtime_dependency_pkgs=(
         # For sending HTTP requests
         curl
@@ -661,6 +648,29 @@ determine_url_download_filename(){
                 1>&2
             return 2
         fi
+    fi
+}
+
+# Determine the actual download filename from the given URL, if the
+# remote server does not hint the download filename, determine it from
+# the URL or fail if the URL does not look like containing the download
+# filename
+#
+# Standard output: Determined filename
+# Return values:
+#
+# * 0 - Success
+# * 1 - Prerequisite error
+# * 2 - Generic error
+determine_url_download_filename(){
+    local download_url="${1}"; shift
+
+    if ! determine_url_download_filename_ensure_deps; then
+        printf \
+            'Error: Unable to ensure runtime dependencies for the "%s" function.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 1
     fi
 
     local curl_response
