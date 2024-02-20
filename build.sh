@@ -654,10 +654,10 @@ determine_url_download_filename(){
     )
     if ! dpkg --status "${runtime_dependency_pkgs[@]}" &>/dev/null; then
         printf \
-            'Info: Installing runtime dependencies for the determine_url_download_filename function...\n'
+            'Info: Installing the runtime dependency packages for the determine_url_download_filename function...\n'
         if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
             printf \
-                'Error: Unable to install the runtime dependencies packages for the determine_url_download_filename function.\n' \
+                'Error: Unable to install the runtime dependency packages for the determine_url_download_filename function.\n' \
                 1>&2
             return 2
         fi
