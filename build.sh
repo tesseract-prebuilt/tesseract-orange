@@ -376,7 +376,89 @@ check_runtime_parameters(){
             'Info: The running user is acceptible(%s)\n' \
             "${running_user}"
     fi
+}
 
+# Query the operating system distribution identifier
+#
+# Standard output: Result operating system distribution identifier
+# Return values:
+#
+# * 0: OS identifier found
+# * 1: Prerequisite not met
+# * 2: Generic error
+get_distro_identifier(){
+    local operating_system_information_file=/etc/os-release
+
+    # shellcheck source=/etc/os-release
+    if ! source "${operating_system_information_file}"; then
+        printf \
+            '%s: Error: Unable to load the operating system information file.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 1
+    fi
+
+    if ! test -v ID; then
+        printf \
+            'Error: The ID variable assignment not found from the operating system information file(%s).\n' \
+            "${operating_system_information_file}" \
+            1>&2
+        return 2
+    fi
+
+    printf '%s' "${ID}"
+}
+
+# Check the availability of the package manager external commands
+#
+# Return values:
+#
+# * 0: Check passed
+# * 1: Prerequisite not met
+# * 2: Generic error
+check_package_manager_commands(){
+    printf 'Info: Checking availability of the package manager external commands...\n'
+
+    local distro_id
+    if ! distro_id="$(get_distro_identifier)"; then
+        printf \
+            'Error: Unable to query the operating system distribution identifier.\n' \
+            1>&2
+        return 2
+    fi
+
+    local -a required_package_manager_commands
+    case "${distro_id}" in
+        debian|ubuntu)
+            required_package_manager_commands=(
+                dpkg
+                apt-get
+            )
+        ;;
+        *)
+            printf \
+                'Error: This operating system(ID=%s) is currently not supported.\n' \
+                "${ID}" \
+                1>&2
+            return 2
+        ;;
+    esac
+
+    local required_command_check_failed=false
+    for command in "${required_package_manager_commands[@]}"; do
+        if ! command -v "${command}" >/dev/null; then
+            printf \
+                'Error: The "%s" required package manager command is not available in your command search PATHs.\n' \
+                "${command}" \
+                1>&2
+            required_command_check_failed=true
+        fi
+    done
+    if test "${required_command_check_failed}" == true; then
+        printf \
+            'Error: Package manager command availability check failed.\n' \
+            1>&2
+        return 3
     fi
 }
 
@@ -384,8 +466,6 @@ prepare_software_sources(){
     print_progress 'Preparing software sources...'
 
     local -a required_commands=(
-        apt-get
-
         # For determining the current time
         date
 
@@ -407,6 +487,13 @@ prepare_software_sources(){
         printf \
             '%s: Error: Required command check failed.\n' \
             "${FUNCNAME[0]}" \
+            1>&2
+        return 1
+    fi
+
+    if ! check_package_manager_commands; then
+        printf \
+            'Error: Package manager command check failed.\n' \
             1>&2
         return 1
     fi
