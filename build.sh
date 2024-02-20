@@ -418,6 +418,109 @@ prepare_software_sources(){
     fi
 }
 
+# Determine the actual download filename from the given URL, if the
+# remote server does not hint the download filename, determine it from
+# the URL or fail if the URL does not look like containing the download
+# filename
+#
+# Standard output: Determined filename
+# Return values:
+#
+# * 0 - Success
+# * 1 - Prerequisite error
+# * 2 - Generic error
+determine_url_download_filename(){
+    local download_url="${1}"; shift
+
+    local -a runtime_dependency_pkgs=(
+        # For sending HTTP requests
+        curl
+
+        # For matching HTTP response headers
+        grep
+    )
+    if ! dpkg --status "${runtime_dependency_pkgs[@]}" &>/dev/null; then
+        printf \
+            'Info: Installing runtime dependencies for the determine_url_download_filename function...\n'
+        if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
+            printf \
+                'Error: Unable to install the runtime dependencies packages for the determine_url_download_filename function.\n' \
+                1>&2
+            return 2
+        fi
+    fi
+
+    local curl_response
+    local -a curl_opts=(
+        # Only fetch the response header
+        --head
+
+        # Follow URL redirection instructed by the remote server
+        --location
+
+        # Return non-zero exit status when HTTP error occurs
+        --fail
+
+        # Do not show progress meter but keep error messages
+        --silent
+        --show-error
+    )
+    if ! curl_response="$(curl "${curl_opts[@]}" "${download_url}")"; then
+        printf \
+            '%s: Error: Received an HTTP client error while trying to access the download URL "%s".\n' \
+            "${FUNCNAME[0]}" \
+            "${download_url}" \
+            1>&2
+        return 2
+    fi
+
+    local download_filename
+    local content_diposition_response_header
+    local -a grep_opts=(
+        # Match without case-sensitivity(HTTP header may be in
+        # different case
+        --ignore-case
+
+        # Use ERE instead of BRE which is more consistent with other
+        # regexes
+        --extended-regexp
+    )
+    local regex_content_disposition_header='^Content-Disposition:[[:space:]]+attachment;[[:space:]]+filename='
+    if ! content_diposition_response_header="$(
+        grep \
+            "${grep_opts[@]}" \
+            "${regex_content_disposition_header}" \
+            <<<"${curl_response}"
+        )"; then
+
+        local regex_url_with_trailing_slash='/$'
+        # Remote server doesn't indicate the downloaded filename, guess
+        # it via the download URL
+        if [[ "${download_url}" =~ ${regex_url_with_trailing_slash} ]]; then
+            # Doesn't seemed to be a proper filename URL, error out
+            printf \
+                '%s: Error: The download URL(%s) does not seem to contain a download filename.\n' \
+                "${FUNCNAME[0]}" \
+                "${download_url}" \
+                1>&2
+            return 2
+        fi
+
+        # Stripping out the query string
+        local download_url_without_query_string="${download_url%%\?*}"
+
+        # Assuming the last path component of the download URL is the filename
+        download_filename="${download_url_without_query_string##*/}"
+    else
+        # Stripping out trailing carriage return character
+        content_diposition_response_header="${content_diposition_response_header%$'\r'}"
+
+        download_filename="${content_diposition_response_header##*=}"
+    fi
+
+    printf '%s' "${download_filename}"
+}
+
 # Operations done when the program is terminating
 trap_exit(){
     if test -v temp_dir && test -e "${temp_dir}"; then
