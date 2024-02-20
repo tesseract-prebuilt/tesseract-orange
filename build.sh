@@ -417,8 +417,6 @@ get_distro_identifier(){
 # * 1: Prerequisite not met
 # * 2: Generic error
 check_package_manager_commands(){
-    printf 'Info: Checking availability of the package manager external commands...\n'
-
     local distro_id
     if ! distro_id="$(get_distro_identifier)"; then
         printf \
