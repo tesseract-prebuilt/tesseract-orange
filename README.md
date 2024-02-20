@@ -50,6 +50,18 @@ A Tesseract version number that is available from the Git repository tags (witho
 
 `latest`
 
+### TESSERACT_SOURCE_ARCHIVE_URL
+
+Configures the URL to download Tesseract's source archive from.
+
+#### Accepted values
+
+Any URLs supported by the curl client should work.
+
+#### Default value
+
+<https://github.com/tesseract-ocr/tesseract/archive/refs/tags/_TESSERACT_VERSION_.tar.gz>
+
 ## Reference
 
 Here are some third-party resources that are referenced during the development of this product:

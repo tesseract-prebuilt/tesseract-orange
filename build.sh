@@ -4,6 +4,7 @@
 # Copyright 2023 林博仁 <buo.ren.lin@gmail.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
 TESSERACT_VERSION="${TESSERACT_VERSION:-latest}"
+TESSERACT_SOURCE_ARCHIVE_URL="${TESSERACT_SOURCE_ARCHIVE_URL:-"https://github.com/tesseract-ocr/tesseract/archive/refs/tags/${TESSERACT_VERSION}.tar.gz"}"
 
 init(){
     print_progress \
@@ -120,8 +121,95 @@ init(){
             "${tesseract_version}"
     fi
 
+    local tesseract_source_archive
+    if ! acquire_tesseract_source_archive \
+        tesseract_source_archive \
+        "${tesseract_version}" \
+        "${cache_dir}" \
+        "${TESSERACT_SOURCE_ARCHIVE_URL}"; then
+        printf \
+            'Error: Unable to acquire the Tesseract source archive.\n' \
+            1>&2
+        exit 2
+    fi
+
     print_progress \
         'Operation completed without errors.'
+}
+
+# Download and cache the Tesseract source archive file
+acquire_tesseract_source_archive(){
+    local -n tesseract_source_archive_ref="${1}"; shift
+    local tesseract_version="${1}"; shift
+    local cache_dir="${1}"; shift
+    local tesseract_source_archive_url="${1}"; shift
+
+    print_progress 'Acquiring the Tesseract source archive...'
+
+    # Download archive URL may be invalid for TESSERACT_VERSION=latest
+    if test "${tesseract_source_archive_url}" != "${tesseract_source_archive_url//latest/}"; then
+        tesseract_source_archive_url="${tesseract_source_archive_url//latest/"${tesseract_version}"}"
+    fi
+
+    printf \
+        'Info: Determining the download filename for the Tesseract source archive URL...\n'
+    local download_filename
+    if ! download_filename="$(determine_url_download_filename "${tesseract_source_archive_url}")"; then
+        printf \
+            'Error: Unable to determine the download filename for Tesseract source archive URL "%s".\n' \
+            "${tesseract_source_archive_url}" \
+            1>&2
+        return 2
+    fi
+    printf \
+        'Info: Tesseract source archive download filename determined to be "%s".\n' \
+        "${download_filename}"
+
+    local downloaded_tesseract_source_archive="${cache_dir}/${download_filename}"
+    if ! test -e "${downloaded_tesseract_source_archive}"; then
+        printf \
+            'Info: Downloading Tesseract source archive from URL(%s)...\n' \
+            "${tesseract_source_archive_url}"
+
+        local -a curl_opts=(
+            # Use filename suggested by the remote server as the downloaded
+            # file filename
+            --remote-name
+            --remote-header-name
+
+            # Follow URL redirection instructed by the remote server
+            --location
+
+            # Download to cache directory
+            --output-dir "${cache_dir}"
+
+            # Return non-zero exit status when HTTP error occurs
+            --fail
+
+            # Do not show progress meter but keep error messages
+            --silent
+            --show-error
+
+        )
+        if ! curl "${curl_opts[@]}" "${tesseract_source_archive_url}"; then
+            printf \
+                'Error: Unable to download the Tesseract source archive file.\n' \
+                1>&2
+            return 2
+        else
+            printf \
+                'Info: Tesseract source archive file downloaded to "%s".\n' \
+                "${downloaded_tesseract_source_archive}"
+        fi
+    else
+        printf \
+            'Info: Using cached Tesseract source archive file "%s".\n' \
+            "${downloaded_tesseract_source_archive}"
+    fi
+
+    # FALSE POSITIVE: Variable references are used externally
+    # shellcheck disable=SC2034
+    tesseract_source_archive_ref="${downloaded_tesseract_source_archive}"
 }
 
 query_latest_tesseract_version_ensure_dependencies(){
