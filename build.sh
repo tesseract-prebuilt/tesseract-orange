@@ -152,7 +152,8 @@ acquire_tesseract_source_archive(){
     fi
 
     printf \
-        'Info: Determining the download filename for the Tesseract source archive URL...\n'
+        'Info: Determining the download filename for the Tesseract source archive URL(%s)...\n' \
+        "${tesseract_source_archive_url}"
     local download_filename
     if ! download_filename="$(determine_url_download_filename "${tesseract_source_archive_url}")"; then
         printf \
