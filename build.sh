@@ -630,6 +630,68 @@ prepare_software_sources(){
     fi
 }
 
+# Determine the type of the specified archive file
+#
+# Standard output: The determined file type:
+#
+# * tarball: Uncompressed tarball
+# * tarball-bzip2: bzip2-compressed tarball
+# * tarball-gzip: gzip-compressed tarball
+# * tarball-xz: XZ-compressed tarball
+# * zip: ZIP archive
+#
+# Return values:
+#
+# * 0: Check successful
+# * 1: Prerequisite error
+# * 2: Generic error
+# * 3: Archive type unknown
+determine_archive_file_type(){
+    local archive_file="${1}"; shift
+
+    if ! test -e "${archive_file}"; then
+        printf \
+            '%s: Error: The specified archive file does not exist.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 2
+    fi
+
+    local determined_archive_type=
+    if test "${archive_file%.tar}" != "${archive_file}"; then
+        determined_archive_type=tarball
+    fi
+
+    if test "${archive_file%.zip}" != "${archive_file}"; then
+        determined_archive_type=zip
+    fi
+
+    if test "${archive_file%.tar.*}" != "${archive_file}"; then
+        local tarball_filename_suffix="${archive_file##*.}"
+        case "${tarball_filename_suffix}" in
+            bz2)
+                determined_archive_type=tarball-bzip2
+            ;;
+            gz)
+                determined_archive_type=tarball-gzip
+            ;;
+            xz)
+                determined_archive_type=tarball-xz
+            ;;
+            *)
+                # Not found by default, do nothing
+                :
+            ;;
+        esac
+    fi
+
+    if test -z "${determined_archive_type}"; then
+        return 3
+    fi
+
+    printf '%s' "${determined_archive_type}"
+}
+
 determine_url_download_filename_ensure_deps(){
     if ! check_package_manager_commands; then
         printf \
