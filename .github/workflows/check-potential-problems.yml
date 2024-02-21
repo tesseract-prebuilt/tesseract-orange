@@ -77,6 +77,11 @@ jobs:
           key: ${{ runner.os }}-cache-dir
           path: ${{ env.CACHE_DIR }}
 
+      - name: >-
+          Patch the sudo security policy so that programs run via sudo
+          will recognize environment variables predefined by GitHub
+        run: sudo ./continuous-integration/patch-github-actions-sudo-security-policy.sh
+
       - name: Run the product build program
         run: |
           sudo ./build.sh
