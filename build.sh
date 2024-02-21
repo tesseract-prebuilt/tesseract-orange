@@ -111,7 +111,13 @@ init(){
             exit 2
         fi
 
-        tesseract_version="$(query_latest_tesseract_version)"
+        if ! tesseract_version="$(query_latest_tesseract_version)"; then
+            printf \
+                'Error: Unable to query the latest tesseract version.\n' \
+                1>&2
+            exit 2
+        fi
+
         printf \
             'Info: Will build current latest version of Tesseract("%s") determined from the GitHub References API response.\n' \
             "${tesseract_version}"
