@@ -243,7 +243,7 @@ query_latest_tesseract_version_ensure_deps(){
 }
 
 # Determine tesseract version to be built (when TESSERACT_VERSION is set
-# to "auto") by calling the GitHub APIs
+# to "latest") by calling the GitHub APIs
 #
 # Standard output: version to be built(without the `v` prefix)
 query_latest_tesseract_version(){
