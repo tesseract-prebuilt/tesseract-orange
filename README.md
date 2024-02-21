@@ -62,6 +62,19 @@ Any URLs supported by the curl client should work.
 
 <https://github.com/tesseract-ocr/tesseract/archive/refs/tags/_TESSERACT_VERSION_.tar.gz>
 
+### TESSERACT_ORANGE_DEBUG
+
+Enables the debugging features for the Tesseract Orange builder, including but not limited to disabling clean up of the temporary directory.
+
+#### Accepted values
+
+* `true`: Enable debugging features
+* `false`: Disable debugging features
+
+#### Default value
+
+`false`
+
 ## Reference
 
 Here are some third-party resources that are referenced during the development of this product:

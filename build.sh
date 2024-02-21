@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 TESSERACT_VERSION="${TESSERACT_VERSION:-latest}"
 TESSERACT_SOURCE_ARCHIVE_URL="${TESSERACT_SOURCE_ARCHIVE_URL:-"https://github.com/tesseract-ocr/tesseract/archive/refs/tags/${TESSERACT_VERSION}.tar.gz"}"
+TESSERACT_ORANGE_DEBUG="${TESSERACT_ORANGE_DEBUG:-true}"
 
 init(){
     print_progress \
@@ -792,12 +793,21 @@ determine_url_download_filename(){
 
 # Operations done when the program is terminating
 trap_exit(){
-    if test -v temp_dir && test -e "${temp_dir}"; then
+    if test -v temp_dir \
+        && test -e "${temp_dir}" \
+        && test "${TESSERACT_ORANGE_DEBUG}" == false; then
         if ! rm -rf "${temp_dir}"; then
             printf \
                 'Warning: Unable to clean up the temporary directory.\n' \
                 1>&2
         fi
+    fi
+
+    if test "${TESSERACT_ORANGE_DEBUG}" == true; then
+        printf \
+            'DEBUG: Temporary directory for debugging: %s.\n' \
+            "${temp_dir}" \
+            1>&2
     fi
 }
 
