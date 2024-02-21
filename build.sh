@@ -104,7 +104,7 @@ init(){
     print_progress 'Determining which Tesseract version to build...'
     local tesseract_version
     if test "${TESSERACT_VERSION}" == latest; then
-        if ! query_latest_tesseract_version_ensure_dependencies; then
+        if ! query_latest_tesseract_version_ensure_deps; then
             printf \
                 'Error: Unable to ensure the runtime dependencies for the query_latest_tesseract_version function.\n' \
                 1>&2
@@ -225,7 +225,7 @@ acquire_tesseract_source_archive(){
     tesseract_source_archive_ref="${downloaded_tesseract_source_archive}"
 }
 
-query_latest_tesseract_version_ensure_dependencies(){
+query_latest_tesseract_version_ensure_deps(){
     local -a runtime_dependency_pkgs=(
         curl
         jq
