@@ -7,6 +7,8 @@ TESSERACT_VERSION="${TESSERACT_VERSION:-latest}"
 TESSERACT_SOURCE_ARCHIVE_URL="${TESSERACT_SOURCE_ARCHIVE_URL:-"https://github.com/tesseract-ocr/tesseract/archive/refs/tags/${TESSERACT_VERSION}.tar.gz"}"
 TESSERACT_ORANGE_DEBUG="${TESSERACT_ORANGE_DEBUG:-false}"
 
+LEPTONICA_VERSION="${LEPTONICA_VERSION:-latest}"
+
 init(){
     print_progress \
         'Tesseract Orange product build program' \
@@ -99,6 +101,33 @@ init(){
             'Error: Unable to create the source and build base directory.\n' \
             1>&2
         exit 2
+    fi
+
+    print_progress 'Determining which Leptonica version to build...'
+    local leptonica_version
+    if test "${LEPTONICA_VERSION}" == latest; then
+        if ! query_latest_leptonica_version_ensure_deps; then
+            printf \
+                'Error: Unable to ensure the runtime dependencies for the query_latest_leptonica_version function.\n' \
+                1>&2
+            exit 2
+        fi
+
+        if ! leptonica_version="$(query_latest_leptonica_version)"; then
+            printf \
+                'Error: Unable to query the latest Leptonica version.\n' \
+                1>&2
+            exit 2
+        fi
+
+        printf \
+            'Info: Will build current latest version of Leptonica("%s") determined from the GitHub References API response.\n' \
+            "${leptonica_version}"
+    else
+        leptonica_version="${LEPTONICA_VERSION}"
+        printf \
+            'Info: Will build version "%s" of Leptonica specified from the LEPTONICA_VERSION environment variable.\n' \
+            "${leptonica_version}"
     fi
 
     print_progress 'Determining which Tesseract version to build...'
@@ -229,6 +258,75 @@ acquire_tesseract_source_archive(){
     # FALSE POSITIVE: Variable references are used externally
     # shellcheck disable=SC2034
     tesseract_source_archive_ref="${downloaded_tesseract_source_archive}"
+}
+
+# Ensure the runtime dependencies of the
+# query_latest_leptonica_version function, requires to be run as the
+# superuser(root).
+#
+# Return values:
+#
+# * 0: Operation successful
+# * 1: Prerequisite error
+# * 2: Generic error
+query_latest_leptonica_version_ensure_deps(){
+    local -a runtime_dependency_pkgs=(
+        curl
+        jq
+    )
+    if ! dpkg --status "${runtime_dependency_pkgs[@]}" &>/dev/null; then
+        printf \
+            'Info: Installing runtime dependencies for the "query_latest_leptonica_version" function...\n'
+        if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
+            printf \
+                'Error: Unable to install the runtime dependencies packages for the "query_latest_leptonica_version" function.\n' \
+                1>&2
+            return 2
+        fi
+    fi
+}
+
+# Determine Leptonica version to be built (when LEPTONICA_VERSION is set
+# to "latest") by calling the GitHub APIs
+#
+# Standard output: version to be built(without the `v` prefix)
+query_latest_leptonica_version(){
+    local -a curl_opts=(
+        --request GET
+        --header 'X-GitHub-Api-Version: 2022-11-28'
+        --header 'Accept: application/vnd.github+json'
+        --header 'User-Agent: Tesseract Orange Builder <https://gitlab.com/tesseract-prebuilt/tesseract-orange/-/issues>'
+
+        --silent
+        --show-error
+    )
+    if ! github_list_matching_references_response="$(
+        curl "${curl_opts[@]}" https://api.github.com/repos/DanBloomberg/leptonica/git/matching-refs/tags/
+        )"; then
+        printf \
+            'Error: Unable to query the Leptonica repository Git tag list information from GitHub.\n' \
+            1>&2
+        return 1
+    fi
+
+    local last_git_tag_reference
+    local -a jq_opts=(
+        --raw-output
+    )
+    if ! last_git_tag_reference="$(
+        jq \
+            "${jq_opts[@]}" \
+            '.[-1].ref' \
+            <<<"${github_list_matching_references_response}"
+        )"; then
+        printf \
+            'Error: Unable to parse out the last Git tag reference name from the Git tag list information.\n' \
+            1>&2
+        return 1
+    fi
+
+    local last_git_tag="${last_git_tag_reference##*/}"
+    printf -- '%s' "${last_git_tag}"
 }
 
 query_latest_tesseract_version_ensure_deps(){

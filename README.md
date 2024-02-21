@@ -38,6 +38,18 @@ This section documents the prerequisites of the product building container:
 
 ## Environment variables that will change the prodoct builder's behavior
 
+### LEPTONICA_VERSION
+
+Determine [which version of Leptonica](https://github.com/DanBloomberg/leptonica/releases) to build.
+
+#### Accepted values
+
+A Leptonica version number that is available from [the Git repository tags](https://github.com/DanBloomberg/leptonica/tags) (without the `v` tag name prefix) or `latest`(detect and build the current upstream latest version).
+
+#### Default value
+
+`latest`
+
 ### TESSERACT_VERSION
 
 Determine which version of Tesseract to build.
