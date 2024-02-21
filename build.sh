@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 TESSERACT_VERSION="${TESSERACT_VERSION:-latest}"
 TESSERACT_SOURCE_ARCHIVE_URL="${TESSERACT_SOURCE_ARCHIVE_URL:-"https://github.com/tesseract-ocr/tesseract/archive/refs/tags/${TESSERACT_VERSION}.tar.gz"}"
-TESSERACT_ORANGE_DEBUG="${TESSERACT_ORANGE_DEBUG:-true}"
+TESSERACT_ORANGE_DEBUG="${TESSERACT_ORANGE_DEBUG:-false}"
 
 init(){
     print_progress \
@@ -130,6 +130,17 @@ init(){
         "${TESSERACT_SOURCE_ARCHIVE_URL}"; then
         printf \
             'Error: Unable to acquire the Tesseract source archive.\n' \
+            1>&2
+        exit 2
+    fi
+
+    print_progress 'Extracting the Tesseract software archive...'
+    local tesseract_source_dir="${source_basedir}/tesseract"
+    if ! extract_software_archive \
+        "${tesseract_source_archive}" \
+        "${tesseract_source_dir}"; then
+        printf \
+            'Error: Unable to extract the Tesseract source archive.\n' \
             1>&2
         exit 2
     fi
