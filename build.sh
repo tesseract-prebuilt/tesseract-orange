@@ -232,10 +232,12 @@ query_latest_tesseract_version_ensure_deps(){
     )
     if ! dpkg --status "${runtime_dependency_pkgs[@]}" &>/dev/null; then
         printf \
-            'Info: Installing runtime dependencies for the query_latest_tesseract_version function...\n'
+            'Info: Installing runtime dependencies for the "%s" function...\n' \
+            "${FUNCNAME[1]}"
         if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
             printf \
-                'Error: Unable to install the runtime dependencies packages for the query_latest_tesseract_version function.\n' \
+                'Error: Unable to install the runtime dependencies packages for the "%s" function.\n' \
+                "${FUNCNAME[1]}" \
                 1>&2
             return 2
         fi
