@@ -692,6 +692,178 @@ determine_archive_file_type(){
     printf '%s' "${determined_archive_type}"
 }
 
+# Ensure runtime dependencies for the list_archive_memebers_ensure_deps function
+#
+# Return values:
+#
+# * 0: Successful
+# * 1: Prerequisite error
+# * 2: Generic error
+list_archive_memebers_ensure_deps(){
+    local software_archive="${1}"
+
+    local archive_type
+    if ! archive_type="$(determine_archive_file_type "${software_archive}")"; then
+        printf \
+            '%s: Error: Unable to determine the type of the "%s" software archive file.\n' \
+            "${FUNCNAME[0]}" \
+            "${software_archive}" \
+            1>&2
+        return 2
+    fi
+
+    local -a runtime_dependency_pkgs=()
+
+    case "${archive_type}" in
+        tarball)
+            runtime_dependency_pkgs+=(tar)
+        ;;
+        tarball-bzip2)
+            runtime_dependency_pkgs+=(bzip2 tar)
+        ;;
+        tarball-gzip)
+            runtime_dependency_pkgs+=(gzip tar)
+        ;;
+        tarball-xz)
+            runtime_dependency_pkgs+=(tar xz)
+        ;;
+        zip)
+            runtime_dependency_pkgs+=(unzip)
+        ;;
+        *)
+            printf \
+                '%s: Error: Unsupported archive type "%s".\n' \
+                "${FUNCNAME[1]}" \
+                "${archive_type}" \
+                1>&2
+            return 2
+        ;;
+    esac
+
+    if ! check_package_manager_commands; then
+        printf \
+            '%s: Error: Package manager command check failed.\n' \
+            "${FUNCNAME[1]}" \
+            1>&2
+        return 1
+    fi
+
+    local runtime_dependency_packages_missing=false
+    local distro_id
+    if ! distro_id="$(get_distro_identifier)"; then
+        printf \
+            '%s: Error: Unable to query the operating system distribution identifier.\n' \
+            "${FUNCNAME[1]}" \
+            1>&2
+        return 2
+    fi
+
+    case "${distro_id}" in
+        debian|ubuntu)
+            if ! dpkg --status "${runtime_dependency_pkgs[@]}" &>/dev/null; then
+                runtime_dependency_packages_missing=true
+            fi
+        ;;
+        *)
+            printf \
+                '%s: Error: Operating system distribution(ID=%s) not supported.\n' \
+                "${FUNCNAME[1]}" \
+                "${distro_id}" \
+                1>&2
+            return 1
+        ;;
+    esac
+
+    if test "${runtime_dependency_packages_missing}" == true; then
+        printf \
+            'Info: Installing the runtime dependency packages for the "%s" function...\n' \
+            "${FUNCNAME[1]}"
+
+        case "${distro_id}" in
+            debian|ubuntu)
+                if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
+                    printf \
+                        'Error: Unable to install the runtime dependency packages for the "%s" function.\n' \
+                        "${FUNCNAME[1]}" \
+                        1>&2
+                    return 2
+                fi
+            ;;
+            *)
+                printf \
+                    '%s: Error: Operating system distribution(ID=%s) not supported.\n' \
+                    "${FUNCNAME[1]}" \
+                    "${distro_id}" \
+                    1>&2
+                return 1
+            ;;
+        esac
+    fi
+}
+
+# List all members of the specified archive file, one per line
+#
+# Return values:
+#
+# * 0: Successful
+# * 1: Prerequisite error
+# * 2: Generic error
+list_archive_memebers(){
+    local archive_file="${1}"; shift
+
+    if ! list_archive_memebers_ensure_deps "${archive_file}"; then
+        printf \
+            'Error: Unable to ensure the runtime dependencies for the "%s" function.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 1
+    fi
+
+    if ! test -e "${archive_file}"; then
+        printf \
+            '%s: Error: The specified archive file(%s) does not exist.\n' \
+            "${FUNCNAME[0]}" \
+            "${archive_file}" \
+            1>&2
+        return 2
+    fi
+
+    local archive_type
+    if ! archive_type="$(determine_archive_file_type "${archive_file}")"; then
+        printf \
+            '%s: Error: Unable to determine the type of the "%s" archive file.\n' \
+            "${FUNCNAME[0]}" \
+            "${archive_file}" \
+            1>&2
+        return 2
+    fi
+
+    case "${archive_type}" in
+        tarball*)
+            local -a tar_opts=(
+                --list
+                --file "${archive_file}"
+            )
+            if ! tar "${tar_opts[@]}"; then
+                printf \
+                    '%s: Error: Error occurred when trying to list the members of the "%s" archive file.\n' \
+                    "${FUNCNAME[0]}" \
+                    "${archive_file}" \
+                    1>&2
+                return 2
+            fi
+        ;;
+        *)
+            printf \
+                '%s: Error: Archive type of the specified archive file(%s) is unsupported.\n' \
+                "${FUNCNAME[0]}" \
+                "${archive_file}" \
+                1>&2
+            return 1
+        ;;
+    esac
+}
+
 determine_url_download_filename_ensure_deps(){
     if ! check_package_manager_commands; then
         printf \
