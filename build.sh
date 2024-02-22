@@ -928,7 +928,32 @@ prepare_software_sources(){
         fi
     fi
 
-    if ! test -v CI; then
+    if test -v CI; then
+        printf \
+            'Info: CI environment detected, will not attempt to change the software sources.\n'
+    else
+        local -a mirror_patch_dependency_pkgs=(
+            # For sending HTTP request to third-party IP address lookup
+            # services
+            curl
+
+            # For parsing IP address lookup response
+            grep
+
+            # For patching APT software source definition list
+            sed
+        )
+        if ! dpkg --status "${mirror_patch_dependency_pkgs[@]}" &>/dev/null; then
+            printf \
+                'Info: Installing the runtime dependencies packages for the mirror patching functionality...\n'
+            if ! apt-get install -y "${mirror_patch_dependency_pkgs[@]}"; then
+                printf \
+                    'Error: Unable to install the runtime dependencies packages for the mirror patching functionality.\n' \
+                    1>&2
+                return 2
+            fi
+        fi
+
         printf \
             'Info: Detecting local region code...\n'
         local -a curl_opts=(
