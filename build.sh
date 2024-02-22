@@ -8,6 +8,7 @@ TESSERACT_SOURCE_ARCHIVE_URL="${TESSERACT_SOURCE_ARCHIVE_URL:-"https://github.co
 TESSERACT_ORANGE_DEBUG="${TESSERACT_ORANGE_DEBUG:-false}"
 
 LEPTONICA_VERSION="${LEPTONICA_VERSION:-latest}"
+LEPTONICA_SOURCE_ARCHIVE_URL="${LEPTONICA_SOURCE_ARCHIVE_URL:-"https://github.com/DanBloomberg/leptonica/releases/download/${LEPTONICA_VERSION}/leptonica-${LEPTONICA_VERSION}.tar.gz"}"
 
 init(){
     print_progress \
@@ -128,6 +129,19 @@ init(){
         printf \
             'Info: Will build version "%s" of Leptonica specified from the LEPTONICA_VERSION environment variable.\n' \
             "${leptonica_version}"
+    fi
+
+    local leptonica_source_archive
+    if ! acquire_leptonica_source_archive \
+        leptonica_source_archive \
+        "${leptonica_version}" \
+        "${cache_dir}" \
+        "${LEPTONICA_SOURCE_ARCHIVE_URL}"; then
+        printf \
+            'Error: Unable to acquire the "%s" version of the Leptonica source archive.\n' \
+            "${leptonica_version}" \
+            1>&2
+        exit 2
     fi
 
     print_progress 'Determining which Tesseract version to build...'
@@ -259,6 +273,83 @@ acquire_tesseract_source_archive(){
     # FALSE POSITIVE: Variable references are used externally
     # shellcheck disable=SC2034
     tesseract_source_archive_ref="${downloaded_tesseract_source_archive}"
+}
+
+# Acquire the Leptonica source archive from the given URL, unless it is
+# already available in the cache directory
+acquire_leptonica_source_archive(){
+    local -n leptonica_source_archive_ref="${1}"; shift
+    local leptonica_version="${1}"; shift
+    local cache_dir="${1}"; shift
+    local leptonica_source_archive_url="${1}"; shift
+
+    print_progress 'Acquiring the Leptonica source archive...'
+
+    # Download archive URL may be invalid for TESSERACT_VERSION=latest
+    if test "${leptonica_source_archive_url}" != "${leptonica_source_archive_url//latest/}"; then
+        leptonica_source_archive_url="${leptonica_source_archive_url//latest/"${leptonica_version}"}"
+    fi
+
+    printf \
+        'Info: Determining the download filename for the Leptonica source archive URL(%s)...\n' \
+        "${leptonica_source_archive_url}"
+    local download_filename
+    if ! download_filename="$(determine_url_download_filename "${leptonica_source_archive_url}")"; then
+        printf \
+            'Error: Unable to determine the download filename for Leptonica source archive URL "%s".\n' \
+            "${leptonica_source_archive_url}" \
+            1>&2
+        return 2
+    fi
+    printf \
+        'Info: Leptonica source archive download filename determined to be "%s".\n' \
+        "${download_filename}"
+
+    local downloaded_leptonica_source_archive="${cache_dir}/${download_filename}"
+    if ! test -e "${downloaded_leptonica_source_archive}"; then
+        printf \
+            'Info: Downloading Leptonica source archive from URL(%s)...\n' \
+            "${leptonica_source_archive_url}"
+
+        local -a curl_opts=(
+            # Use filename suggested by the remote server as the downloaded
+            # file filename
+            --remote-name
+            --remote-header-name
+
+            # Follow URL redirection instructed by the remote server
+            --location
+
+            # Download to cache directory
+            --output-dir "${cache_dir}"
+
+            # Return non-zero exit status when HTTP error occurs
+            --fail
+
+            # Do not show progress meter but keep error messages
+            --silent
+            --show-error
+
+        )
+        if ! curl "${curl_opts[@]}" "${leptonica_source_archive_url}"; then
+            printf \
+                'Error: Unable to download the Leptonica source archive file.\n' \
+                1>&2
+            return 2
+        else
+            printf \
+                'Info: Leptonica source archive file downloaded to "%s".\n' \
+                "${downloaded_leptonica_source_archive}"
+        fi
+    else
+        printf \
+            'Info: Using cached Leptonica source archive file "%s".\n' \
+            "${downloaded_leptonica_source_archive}"
+    fi
+
+    # FALSE POSITIVE: Variable references are used externally
+    # shellcheck disable=SC2034
+    leptonica_source_archive_ref="${downloaded_leptonica_source_archive}"
 }
 
 # Ensure the runtime dependencies of the

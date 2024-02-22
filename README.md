@@ -50,6 +50,18 @@ A Leptonica version number that is available from [the Git repository tags](http
 
 `latest`
 
+### LEPTONICA_SOURCE_ARCHIVE_URL
+
+Configures the URL to download Leptonica's source archive from.
+
+#### Accepted values
+
+Any URLs supported by the curl client should work.
+
+#### Default value
+
+<https://github.com/DanBloomberg/leptonica/releases/download/_LEPTONICA_VERSION_/leptonica-_LEPTONICA_VERSION_.tar.gz>
+
 ### TESSERACT_VERSION
 
 Determine which version of Tesseract to build.
