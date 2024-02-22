@@ -165,6 +165,13 @@ init(){
         exit 2
     fi
 
+    if ! build_leptonica "${leptonica_build_dir}"; then
+        printf \
+            'Error: Unable to build Leptonica from its source code.\n' \
+            1>&2
+        exit 2
+    fi
+
     print_progress 'Determining which Tesseract version to build...'
     local tesseract_version
     if test "${TESSERACT_VERSION}" == latest; then
@@ -294,6 +301,45 @@ acquire_tesseract_source_archive(){
     # FALSE POSITIVE: Variable references are used externally
     # shellcheck disable=SC2034
     tesseract_source_archive_ref="${downloaded_tesseract_source_archive}"
+}
+
+# Build Leptonica from its source code
+#
+# Return values:
+#
+# * 0: Operation successful
+# * 1: Prerequisite not met
+# * 2: Generic error
+build_leptonica(){
+    local build_dir="${1}"; shift
+
+    print_progress 'Building Leptonica from its source code...'
+
+    if ! cd "${build_dir}"; then
+        printf \
+            'Error: Unable to change the working directory to the Leptonica build directory(%s).\n' \
+            "${build_dir}" \
+            1>&2
+        return 2
+    fi
+
+    local -i cpu_cores
+    if ! cpu_cores="$(nproc)"; then
+        printf \
+            'Error: Unable to query the number of the CPU cores.\n' \
+            1>&2
+        return 2
+    fi
+
+    local -a make_opts=(
+        --jobs="${cpu_cores}"
+    )
+    if ! make "${make_opts[@]}"; then
+        printf \
+            'Error: Unable to run the default make recipe.\n' \
+            1>&2
+        return 2
+    fi
 }
 
 # Configure the build of the Leptonica software
