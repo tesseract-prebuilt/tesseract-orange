@@ -1321,7 +1321,6 @@ extract_software_archive(){
                 --extract
                 --directory="${target_dir}"
                 --file="${archive_file}"
-                --verbose
             )
 
             if test "${flag_archive_has_leading_dir}" == true; then
@@ -1350,6 +1349,53 @@ extract_software_archive(){
             return 1
         ;;
     esac
+
+    local -a shell_opts=(
+        # Allow '*' wildcard pattern to also match hidden files
+        dotglob
+
+        # Output nothing when expand result is empty
+        nullglob
+    )
+    for shell_option in "${shell_opts[@]}"; do
+        if ! shopt -s "${shell_option}"; then
+            printf \
+                '%s: Error: Unable to set the "%s" shell option.\n' \
+                "${FUNCNAME[0]}" \
+                "${shell_option}" \
+                1>&2
+            return 2
+        fi
+    done
+
+    if ! cd "${target_dir}"; then
+        printf \
+            'Error: Unable to switch the working directory to the target directory(%s).\n' \
+            "${target_dir}" \
+            1>&2
+        return 2
+    fi
+
+    local -a target_dir_members=(*)
+    if test "${#target_dir_members[@]}" -eq 0; then
+        printf \
+            'Warning: Archive extracted successfully, however the target directory is empty.\n' \
+            1>&2
+    else
+        printf \
+            'Info: Archive extracted successfully with the following target directory content available:\n\n'
+        for member in "${target_dir_members[@]}"; do
+            if test -d "${member}"; then
+                printf \
+                    '* %s/\n' \
+                    "${member}"
+            else
+                printf \
+                    '* %s\n' \
+                    "${member}"
+            fi
+        done
+    fi
 }
 
 determine_url_download_filename_ensure_deps(){
