@@ -155,6 +155,16 @@ init(){
         exit 2
     fi
 
+    local leptonica_build_dir="${build_basedir}/leptonica"
+    if ! configure_leptonica_build \
+        "${leptonica_source_dir}" \
+        "${leptonica_build_dir}"; then
+        printf \
+            'Error: Unable to configure the Leptonica build.\n' \
+            1>&2
+        exit 2
+    fi
+
     print_progress 'Determining which Tesseract version to build...'
     local tesseract_version
     if test "${TESSERACT_VERSION}" == latest; then
@@ -284,6 +294,173 @@ acquire_tesseract_source_archive(){
     # FALSE POSITIVE: Variable references are used externally
     # shellcheck disable=SC2034
     tesseract_source_archive_ref="${downloaded_tesseract_source_archive}"
+}
+
+# Configure the build of the Leptonica software
+#
+# Return values:
+#
+# * 0: OS identifier found
+# * 1: Prerequisite not met
+# * 2: Generic error
+configure_leptonica_build(){
+    local leptonica_source_dir="${1}"; shift
+    local leptonica_build_dir="${1}"; shift
+
+    print_progress 'Configuring the Leptonica build...'
+
+    if ! check_package_manager_commands; then
+        printf \
+            '%s: Error: Package manager command check failed.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 1
+    fi
+
+    local distro_id
+    if ! distro_id="$(get_distro_identifier)"; then
+        printf \
+            'Error: Unable to query the operating system distribution identifier.\n' \
+            1>&2
+        return 2
+    fi
+
+    local build_dependency_packages_missing=false
+    local -a leptonica_build_dependency_pkgs=(
+        # For GIF support
+        libgif-dev
+
+        # For JPEG support
+        libjpeg-dev
+
+        # For JPEG 2000 support
+        libopenjp2-7-dev
+
+        # For PNG support
+        libpng-dev
+
+        # For TIFF support
+        libtiff-dev
+
+        # For WEBP support
+        libwebp-dev
+
+        # For running build automation
+        make
+
+        # For zlib support
+        zlib1g-dev
+    )
+    case "${distro_id}" in
+        debian|ubuntu)
+            if ! dpkg --status "${leptonica_build_dependency_pkgs[@]}" &>/dev/null; then
+                build_dependency_packages_missing=true
+            fi
+        ;;
+        *)
+            printf \
+                'Error: Operating system distribution(ID=%s) not supported.\n' \
+                "${distro_id}" \
+                1>&2
+            return 1
+        ;;
+    esac
+
+    if test "${build_dependency_packages_missing}" == true; then
+        printf \
+            'Info: Installing the build dependency packages for the Leptonica software...\n'
+
+        case "${distro_id}" in
+            debian|ubuntu)
+                if ! apt-get install -y "${leptonica_build_dependency_pkgs[@]}"; then
+                    printf \
+                        'Error: Unable to install the build dependency packages for the Leptonica software.\n' \
+                        1>&2
+                    return 2
+                fi
+            ;;
+            *)
+                printf \
+                    '%s: Error: Operating system distribution(ID=%s) not supported.\n' \
+                    "${FUNCNAME[1]}" \
+                    "${distro_id}" \
+                    1>&2
+                return 1
+            ;;
+        esac
+    fi
+
+    if ! test -e "${leptonica_build_dir}"; then
+        printf \
+            'Info: Creating the Leptonica build directory...\n'
+        if ! mkdir "${leptonica_build_dir}"; then
+            printf \
+                'Error: Unable to create the Leptonica build directory.\n' \
+                1>&2
+            return 2
+        fi
+    fi
+
+    printf \
+        'Info: Changing the working directory to the Leptonica build directory...\n'
+    if ! cd "${leptonica_build_dir}"; then
+        printf \
+            'Error: Unable to change the working directory to the Leptonica build directory(%s).\n' \
+            "${leptonica_build_dir}" \
+            1>&2
+        return 2
+    fi
+
+    printf \
+        'Info: Running the Leptonica build configuration program...\n'
+    local -a leptonica_configure_envs=(
+        # Disable debugging symbols
+        CFLAGS=-O2
+    )
+    local -a leptonica_configure_opts=(
+        # Disable developer options that slow down the build
+        --disable-dependency-tracking
+
+        # Don't build static library
+        --disable-static
+
+        # Don't build unused executable programs
+        --disable-programs
+
+        # Enable zlib support
+        --with-zlib
+
+        # Enable PNG support
+        --with-libpng
+
+        # Enable JPEG support
+        --with-jpeg
+
+        # Enable GIF support
+        --with-giflib
+
+        # Enable TIFF support
+        --with-libtiff
+
+        # Enable Webp support
+        --with-libwebp
+
+        # Enable libwebpmux support
+        --with-libwebpmux
+
+        # Enable JPEG 2000 support
+        --with-libopenjpeg
+    )
+    if ! \
+        env \
+            "${leptonica_configure_envs[@]}" \
+            "${leptonica_source_dir}/configure" \
+            "${leptonica_configure_opts[@]}"; then
+        printf \
+            'Error: Unable to run the Leptonica build configuration program.\n' \
+            1>&2
+        return 2
+    fi
 }
 
 # Acquire the Leptonica source archive from the given URL, unless it is
