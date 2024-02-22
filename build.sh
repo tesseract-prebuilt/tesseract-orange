@@ -1267,33 +1267,38 @@ extract_software_archive(){
 
     local flag_archive_has_leading_dir=true
 
-    # If first member isn't a directory, this archive doesn't have a
-    # leading folder
-    local regex_directory_path='/$'
-    if ! [[ "${archive_members[0]}" =~ ${regex_directory_path} ]]; then
+    # If the archive is empty, this archive doesn't have a leading folder
+    if test "${#archive_members[@]}" -eq 0; then
         flag_archive_has_leading_dir=false
-    fi
-
-    local leading_folder="${archive_members[0]}"
-    local leading_folder_matching_regex
-    if ! leading_folder_matching_regex="^$(
-        convert_path_to_regex "${leading_folder}"
-        )"; then
-        printf \
-            '%s: Error: Unable to convert path "%s" to matching regular expression.\n' \
-            "${FUNCNAME[0]}" \
-            "${leading_folder}" \
-            1>&2
-        return 2
-    fi
-
-    for member in "${archive_members[@]}"; do
-        if ! [[ "${member}" =~ ${leading_folder_matching_regex} ]]; then
-            # Different leading member found, this archive doesn't have
-            # a single leading folder
+    else
+        # If first member isn't a directory, this archive doesn't have a
+        # leading folder
+        local regex_directory_path='/$'
+        if ! [[ "${archive_members[0]}" =~ ${regex_directory_path} ]]; then
             flag_archive_has_leading_dir=false
         fi
-    done
+
+        local leading_folder="${archive_members[0]}"
+        local leading_folder_matching_regex
+        if ! leading_folder_matching_regex="^$(
+            convert_path_to_regex "${leading_folder}"
+            )"; then
+            printf \
+                '%s: Error: Unable to convert path "%s" to matching regular expression.\n' \
+                "${FUNCNAME[0]}" \
+                "${leading_folder}" \
+                1>&2
+            return 2
+        fi
+
+        for member in "${archive_members[@]}"; do
+            if ! [[ "${member}" =~ ${leading_folder_matching_regex} ]]; then
+                # Different leading member found, this archive doesn't have
+                # a single leading folder
+                flag_archive_has_leading_dir=false
+            fi
+        done
+    fi
 
     if test "${flag_archive_has_leading_dir}" == true; then
         printf \
