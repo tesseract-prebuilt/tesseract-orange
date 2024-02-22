@@ -144,6 +144,17 @@ init(){
         exit 2
     fi
 
+    print_progress 'Extracting the Leptonica source archive...'
+    local leptonica_source_dir="${source_basedir}/leptonica"
+    if ! extract_software_archive \
+        "${leptonica_source_archive}" \
+        "${leptonica_source_dir}"; then
+        printf \
+            'Error: Unable to extract the Leptonica source archive.\n' \
+            1>&2
+        exit 2
+    fi
+
     print_progress 'Determining which Tesseract version to build...'
     local tesseract_version
     if test "${TESSERACT_VERSION}" == latest; then
