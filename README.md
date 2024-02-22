@@ -113,6 +113,8 @@ Here are some third-party resources that are referenced during the development o
   For information regarding how to (properly) interact with the GitHub REST APIs.
 * [Content-Disposition - HTTP | MDN](https://developer.mozilla.org/en-US/docs/web/http/headers/content-disposition)  
   Explains the usage and values of the `Content-Disposition` HTTP header.
+* [README | Leptonica](http://www.leptonica.org/source/README.html)  
+  Explains the specifics of building Leptonica from the source code.
 
 ## Licensing
 
