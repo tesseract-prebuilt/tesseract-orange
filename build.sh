@@ -164,7 +164,8 @@ init(){
         "${cache_dir}" \
         "${TESSERACT_SOURCE_ARCHIVE_URL}"; then
         printf \
-            'Error: Unable to acquire the Tesseract source archive.\n' \
+            'Error: Unable to acquire the "%s" version of the Tesseract source archive.\n' \
+            "${tesseract_version}" \
             1>&2
         exit 2
     fi
