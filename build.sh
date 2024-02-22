@@ -330,6 +330,9 @@ configure_leptonica_build(){
         # Dependency for the build configuration program
         binutils
 
+        # C compiler
+        gcc
+
         # For GIF support
         libgif-dev
 
