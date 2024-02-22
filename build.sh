@@ -990,7 +990,7 @@ prepare_software_sources(){
                 region_code=
             else
                 printf \
-                    'Info: Local region code determined to be "%s"\n' \
+                    'Info: Local region code determined to be "%s".\n' \
                     "${region_code}"
             fi
         fi
