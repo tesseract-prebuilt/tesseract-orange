@@ -355,6 +355,9 @@ configure_leptonica_build(){
         # For running build automation
         make
 
+        # For external dependency checking
+        pkg-config
+
         # For zlib support
         zlib1g-dev
     )
