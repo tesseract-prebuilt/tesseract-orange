@@ -1258,7 +1258,6 @@ extract_software_archive(){
                 1>&2
             return 1
         ;;
-
     esac
 }
 
