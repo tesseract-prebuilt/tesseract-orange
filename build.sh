@@ -1204,7 +1204,16 @@ extract_software_archive(){
         fi
     done
 
+    if test "${flag_archive_has_leading_dir}" == true; then
+        printf \
+            'Info: The "%s" archive file has a single leading directory, which will be stripped during extraction.\n' \
+            "${archive_file}"
+    fi
+
     if ! test -e "${target_dir}"; then
+        printf \
+            'Info: Creating the "%s" extraction target directory...\n' \
+            "${target_dir}"
         if ! mkdir "${target_dir}"; then
             printf \
                 '%s: Error: Unable to create the "%s" target directory.\n' \
@@ -1229,6 +1238,10 @@ extract_software_archive(){
                 tar_opts+=(--strip-components=1)
             fi
 
+            printf \
+                'Info: Extracting the "%s" tar archive file to the "%s" target directory...\n' \
+                "${archive_file}" \
+                "${target_dir}"
             if ! tar "${tar_opts[@]}"; then
                 printf \
                     'Error: Unable to extract the "%s" tar archive file to the "%s" target directory.\n' \
