@@ -1265,42 +1265,52 @@ extract_software_archive(){
         return 2
     fi
 
-    local flag_archive_has_leading_dir=true
+    local \
+        flag_archive_has_single_leading_dir=true \
+        flag_archive_has_leading_dir=false \
+        leading_folder
 
     # If the archive is empty, this archive doesn't have a leading folder
     if test "${#archive_members[@]}" -eq 0; then
-        flag_archive_has_leading_dir=false
+        flag_archive_has_single_leading_dir=false
     else
-        # If first member isn't a directory, this archive doesn't have a
-        # leading folder
         local regex_directory_path='/$'
-        if ! [[ "${archive_members[0]}" =~ ${regex_directory_path} ]]; then
-            flag_archive_has_leading_dir=false
-        fi
-
-        local leading_folder="${archive_members[0]}"
-        local leading_folder_matching_regex
-        if ! leading_folder_matching_regex="^$(
-            convert_path_to_regex "${leading_folder}"
-            )"; then
-            printf \
-                '%s: Error: Unable to convert path "%s" to matching regular expression.\n' \
-                "${FUNCNAME[0]}" \
-                "${leading_folder}" \
-                1>&2
-            return 2
-        fi
-
         for member in "${archive_members[@]}"; do
-            if ! [[ "${member}" =~ ${leading_folder_matching_regex} ]]; then
-                # Different leading member found, this archive doesn't have
-                # a single leading folder
-                flag_archive_has_leading_dir=false
+            if [[ "${member}" =~ ${regex_directory_path} ]]; then
+                flag_archive_has_leading_dir=true
+                leading_folder="${member%%/*}/"
+                break
             fi
         done
+
+        if test "${flag_archive_has_leading_dir}" == false; then
+            # If no leading folder exist his archive doesn't have a leading
+            # folder
+            flag_archive_has_single_leading_dir=false
+        else
+            local leading_folder_matching_regex
+            if ! leading_folder_matching_regex="^$(
+                convert_path_to_regex "${leading_folder}"
+                )"; then
+                printf \
+                    '%s: Error: Unable to convert path "%s" to matching regular expression.\n' \
+                    "${FUNCNAME[0]}" \
+                    "${leading_folder}" \
+                    1>&2
+                return 2
+            fi
+
+            for member in "${archive_members[@]}"; do
+                if ! [[ "${member}" =~ ${leading_folder_matching_regex} ]]; then
+                    # Different leading member found, this archive doesn't have
+                    # a single leading folder
+                    flag_archive_has_single_leading_dir=false
+                fi
+            done
+        fi
     fi
 
-    if test "${flag_archive_has_leading_dir}" == true; then
+    if test "${flag_archive_has_single_leading_dir}" == true; then
         printf \
             'Info: The "%s" archive file has a single leading directory, which will be stripped during extraction.\n' \
             "${archive_file}"
@@ -1328,7 +1338,7 @@ extract_software_archive(){
                 --file="${archive_file}"
             )
 
-            if test "${flag_archive_has_leading_dir}" == true; then
+            if test "${flag_archive_has_single_leading_dir}" == true; then
                 # Strip the undeterministic leading folder
                 tar_opts+=(--strip-components=1)
             fi
