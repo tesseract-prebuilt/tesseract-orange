@@ -327,6 +327,9 @@ configure_leptonica_build(){
 
     local build_dependency_packages_missing=false
     local -a leptonica_build_dependency_pkgs=(
+        # Dependency for the build configuration program
+        binutils
+
         # For GIF support
         libgif-dev
 
