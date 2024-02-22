@@ -184,7 +184,7 @@ init(){
         exit 2
     fi
 
-    print_progress 'Extracting the Tesseract software archive...'
+    print_progress 'Extracting the Tesseract source archive...'
     local tesseract_source_dir="${source_basedir}/tesseract"
     if ! extract_software_archive \
         "${tesseract_source_archive}" \
