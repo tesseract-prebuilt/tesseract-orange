@@ -300,7 +300,7 @@ acquire_tesseract_source_archive(){
 #
 # Return values:
 #
-# * 0: OS identifier found
+# * 0: Operation successful
 # * 1: Prerequisite not met
 # * 2: Generic error
 configure_leptonica_build(){
