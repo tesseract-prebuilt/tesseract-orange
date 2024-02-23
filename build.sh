@@ -104,6 +104,31 @@ init(){
         exit 2
     fi
 
+    print_progress 'Determining the Tesseract Orange distribution version string...'
+    if ! determine_tesseract_orange_version_ensure_deps; then
+        printf \
+            'Error: Unable to ensure the dependencies of the determine_tesseract_orange_version function.\n' \
+            1>&2
+        exit 2
+    fi
+
+    local product_dir="${script_dir}"
+    local tesseract_orange_version
+    if ! tesseract_orange_version="$(
+        determine_tesseract_orange_version \
+            "${product_dir}" \
+            "${operation_timestamp}"
+        )"; then
+        printf \
+            'Error: Unabel to determine the Tesseract Orange distribution version string.\n' \
+            1>&2
+        exit 2
+    else
+        printf \
+            'Info: Tesseract Orange distribution version determined to be "%s".\n' \
+            "${tesseract_orange_version}"
+    fi
+
     print_progress 'Determining which Leptonica version to build...'
     local leptonica_version
     if test "${LEPTONICA_VERSION}" == latest; then
@@ -1680,6 +1705,143 @@ extract_software_archive(){
             fi
         done
     fi
+}
+
+# Ensure the runtime dependencies for the determine_tesseract_orange_version
+# function
+determine_tesseract_orange_version_ensure_deps(){
+    if ! check_package_manager_commands; then
+        printf \
+            '%s: Error: Package manager command check failed.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 1
+    fi
+
+    local -a runtime_dependency_pkgs=(
+        # For determining the version from the Git repository
+        git
+    )
+
+    local runtime_dependency_packages_missing=false
+    local distro_id
+    if ! distro_id="$(get_distro_identifier)"; then
+        printf \
+            '%s: Error: Unable to query the operating system distribution identifier.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 2
+    fi
+
+    case "${distro_id}" in
+        debian|ubuntu)
+            if ! dpkg --status "${runtime_dependency_pkgs[@]}" &>/dev/null; then
+                runtime_dependency_packages_missing=true
+            fi
+        ;;
+        *)
+            printf \
+                '%s: Error: Operating system distribution(ID=%s) not supported.\n' \
+                "${FUNCNAME[0]}" \
+                "${distro_id}" \
+                1>&2
+            return 1
+        ;;
+    esac
+
+    if test "${runtime_dependency_packages_missing}" == true; then
+        printf \
+            'Info: Installing the runtime dependency packages for the determine_tesseract_orange_version function...\n'
+
+        case "${distro_id}" in
+            debian|ubuntu)
+                if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
+                    printf \
+                        'Error: Unable to install the runtime dependency packages for the determine_tesseract_orange_version function.\n' \
+                        1>&2
+                    return 2
+                fi
+            ;;
+            *)
+                printf \
+                    '%s: Error: Operating system distribution(ID=%s) not supported.\n' \
+                    "${FUNCNAME[0]}" \
+                    "${distro_id}" \
+                    1>&2
+                return 1
+            ;;
+        esac
+    fi
+}
+
+# Determine version of the Tesseract Orange distribution, according to
+# info gathered from the environment(which may be vague or incorrect)
+#
+# Standard output: Determined version string
+determine_tesseract_orange_version(){
+    local product_dir="${1}"; shift
+    local operation_timestamp="${1}"; shift
+
+    local flag_use_vague_version_number=false
+    local tesseract_orange_version
+    local product_git_repository="${product_dir}/.git"
+    if test -e "${product_git_repository}"; then
+        local git_describe_output
+        local -a git_opts=(
+            # Use product directory as the Git working copy directory
+            -C "${product_dir}"
+        )
+        local -a git_describe_opts=(
+            # Show uniquely abbreviated commit object as fallback
+            --always
+
+            # Add marker if the working copy is dirty
+            --dirty
+
+            # Show tags
+            --tags
+        )
+        if ! git_describe_output="$(git "${git_opts[@]}" describe "${git_describe_opts[@]}")"; then
+            printf \
+                'Warning: Unable to determine the version via the "git describe" command, will use vague version number as a fallback.\n' \
+                1>&2
+            flag_use_vague_version_number=true
+        else
+            if test "${TESSERACT_ORANGE_DEBUG}" == true; then
+                printf \
+                    'DEBUG: Using "%s" from the "git describe" command to determine Tesseract Orange distribution version.\n' \
+                    "${git_describe_output}" \
+                    1>&2
+            fi
+
+            tesseract_orange_version="${git_describe_output#v}"
+        fi
+    else
+        local product_dir_name="${product_dir##*/}"
+        local regex_product_prefix='^tesseract-orange-'
+        if ! [[ "${product_dir_name}" =~ ${regex_product_prefix} ]]; then
+            printf \
+                'Warning: The product directory name is not valid Tesseract Orange distribution identifier name, will use vague version number as a fallback.\n' \
+                1>&2
+            flag_use_vague_version_number=true
+        else
+            tesseract_orange_version="${product_dir_name#tesseract-orange-}"
+        fi
+    fi
+
+    if test "${flag_use_vague_version_number}" == true; then
+        tesseract_orange_version="unknown-${operation_timestamp}"
+    fi
+
+    if test "${TESSERACT_ORANGE_DEBUG}" == true; then
+        printf \
+            '%s: DEBUG: Tesseract Orange distribution version determined to be "%s".\n' \
+            "${FUNCNAME[0]}" \
+            "${tesseract_orange_version}" \
+            1>&2
+    fi
+
+    printf '%s' "${tesseract_orange_version}"
 }
 
 determine_url_download_filename_ensure_deps(){

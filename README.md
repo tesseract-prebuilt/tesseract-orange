@@ -115,6 +115,8 @@ Here are some third-party resources that are referenced during the development o
   Explains the usage and values of the `Content-Disposition` HTTP header.
 * [README | Leptonica](http://www.leptonica.org/source/README.html)  
   Explains the specifics of building Leptonica from the source code.
+* [Git - git-describe Documentation](https://git-scm.com/docs/git-describe)  
+  Explains the command-line options of the `git describe` command.
 
 ## Licensing
 
