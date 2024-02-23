@@ -283,6 +283,13 @@ init(){
         exit 2
     fi
 
+    if ! install_tesseract "${tesseract_build_dir}"; then
+        printf \
+            'Error: Unable to install the Tesseract software to the Tesseract installation prefix.\n' \
+            1>&2
+        exit 2
+    fi
+
     print_progress \
         'Operation completed without errors.'
 }
@@ -456,6 +463,51 @@ configure_tesseract_build(){
 
     printf \
         'Info: Tesseract build configured successfully.\n'
+}
+
+# Install the Tesseract software to the installation prefix directory
+#
+# Return values:
+#
+# * 0: Operation successful
+# * 1: Prerequisite not met
+# * 2: Generic error
+install_tesseract(){
+    local tesseract_build_dir="${1}"; shift
+
+    print_progress 'Installing Tesseract...'
+
+    printf \
+        'Info: Changing the working directory to the Tesseract build directory(%s)...\n' \
+        "${tesseract_build_dir}"
+    if ! cd "${tesseract_build_dir}"; then
+        printf \
+            'Error: Unable to change the working directory to the Tesseract build directory(%s).\n' \
+            "${tesseract_build_dir}" \
+            1>&2
+        return 2
+    fi
+
+    printf \
+        'Info: Running the "install" target of the Tesseract makefile...\n'
+    if ! make install; then
+        printf \
+            'Error: Unable to run the "install" target of the Tesseract makefile.\n' \
+            1>&2
+        return 2
+    fi
+
+    printf \
+        'Info: Running the "training-install" target of the Tesseract makefile..\n'
+    if ! make training-install; then
+        printf \
+            'Error: Unable to run the "training-install" target of the Tesseract makefile.\n' \
+            1>&2
+        return 2
+    fi
+
+    printf \
+        'Info: Tesseract installed successfully.\n'
 }
 
 # Build Tesseract from its source code
