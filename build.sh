@@ -569,6 +569,9 @@ build_leptonica(){
 
     print_progress 'Building Leptonica from its source code...'
 
+    printf \
+        'Info: Changing the working directory to the Leptonica build directory(%s)...\n' \
+        "${build_dir}"
     if ! cd "${build_dir}"; then
         printf \
             'Error: Unable to change the working directory to the Leptonica build directory(%s).\n' \
@@ -577,6 +580,8 @@ build_leptonica(){
         return 2
     fi
 
+    printf \
+        'Info: Querying the number of the CPU cores...\n'
     local -i cpu_cores
     if ! cpu_cores="$(nproc)"; then
         printf \
@@ -585,6 +590,8 @@ build_leptonica(){
         return 2
     fi
 
+    printf \
+        'Info: Running the default make recipe...\n'
     local -a make_opts=(
         --jobs="${cpu_cores}"
     )
