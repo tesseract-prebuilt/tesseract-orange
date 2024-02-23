@@ -206,6 +206,14 @@ init(){
         exit 2
     fi
 
+    if ! install_leptonica "${leptonica_build_dir}"; then
+        printf \
+            'Error: Unable to install Leptonica to the Tesseract Orange installation prefix(%s).\n' \
+            "${tesseract_orange_prefix}" \
+            1>&2
+        exit 2
+    fi
+
     print_progress 'Determining which Tesseract version to build...'
     local tesseract_version
     if test "${TESSERACT_VERSION}" == latest; then
@@ -335,6 +343,36 @@ acquire_tesseract_source_archive(){
     # FALSE POSITIVE: Variable references are used externally
     # shellcheck disable=SC2034
     tesseract_source_archive_ref="${downloaded_tesseract_source_archive}"
+}
+
+# Install leptonica to the installation prefix directory
+#
+# Return values:
+#
+# * 0: Operation successful
+# * 1: Prerequisite not met
+# * 2: Generic error
+install_leptonica(){
+    local leptonica_build_dir="${1}"; shift
+
+    print_progress 'Installing Leptonica...'
+    if ! cd "${leptonica_build_dir}"; then
+        printf \
+            'Error: Unable to change the working directory to the Leptonica build directory(%s).\n' \
+            "${leptonica_build_dir}" \
+            1>&2
+        return 2
+    fi
+
+    if ! make install; then
+        printf \
+            'Error: Unable to run the install target of the Leptonica makefile.\n' \
+            1>&2
+        return 2
+    fi
+
+    printf \
+        'Info: Leptonica installed successfully.\n'
 }
 
 # Build Leptonica from its source code
