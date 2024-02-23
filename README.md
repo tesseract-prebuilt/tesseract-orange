@@ -99,7 +99,7 @@ Enables the debugging features for the Tesseract Orange builder, including but n
 
 `false`
 
-## Reference
+## References
 
 Here are some third-party resources that are referenced during the development of this product:
 
