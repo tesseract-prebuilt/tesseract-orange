@@ -99,6 +99,16 @@ Enables the debugging features for the Tesseract Orange builder, including but n
 
 `false`
 
+### TESSERACT_ORANGE_PREFIX
+
+Specifies the installation path prefix of the Tesseract Orange installation.
+
+#### Default value
+
+`/opt/tesseract-orange-_TESSERACT_ORANGE_VERSION_`
+
+The `_TESSERACT_ORANGE_VERSION_` placeholder string will be automatically replaced to the distribution version of the Tesseract Orange source.
+
 ## References
 
 Here are some third-party resources that are referenced during the development of this product:

@@ -6,6 +6,7 @@
 TESSERACT_VERSION="${TESSERACT_VERSION:-latest}"
 TESSERACT_SOURCE_ARCHIVE_URL="${TESSERACT_SOURCE_ARCHIVE_URL:-"https://github.com/tesseract-ocr/tesseract/archive/refs/tags/${TESSERACT_VERSION}.tar.gz"}"
 TESSERACT_ORANGE_DEBUG="${TESSERACT_ORANGE_DEBUG:-false}"
+TESSERACT_ORANGE_PREFIX="/opt/tesseract-orange-_TESSERACT_ORANGE_VERSION_"
 
 LEPTONICA_VERSION="${LEPTONICA_VERSION:-latest}"
 LEPTONICA_SOURCE_ARCHIVE_URL="${LEPTONICA_SOURCE_ARCHIVE_URL:-"https://github.com/DanBloomberg/leptonica/releases/download/${LEPTONICA_VERSION}/leptonica-${LEPTONICA_VERSION}.tar.gz"}"
@@ -128,6 +129,13 @@ init(){
             'Info: Tesseract Orange distribution version determined to be "%s".\n' \
             "${tesseract_orange_version}"
     fi
+
+    print_progress 'Determining the installation prefix path...'
+    local tesseract_orange_prefix
+    tesseract_orange_prefix="${TESSERACT_ORANGE_PREFIX//_TESSERACT_ORANGE_VERSION_/"${tesseract_orange_version}"}"
+    printf \
+        'Info: Installation prefix path determined to be "%s".\n' \
+        "${tesseract_orange_prefix}"
 
     print_progress 'Determining which Leptonica version to build...'
     local leptonica_version
