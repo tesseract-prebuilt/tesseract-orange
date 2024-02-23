@@ -538,6 +538,10 @@ install_leptonica(){
     local leptonica_build_dir="${1}"; shift
 
     print_progress 'Installing Leptonica...'
+
+    printf \
+        'Info: Changing the working directory to the Leptonica build directory(%s)...\n' \
+        "${leptonica_build_dir}"
     if ! cd "${leptonica_build_dir}"; then
         printf \
             'Error: Unable to change the working directory to the Leptonica build directory(%s).\n' \
@@ -546,6 +550,8 @@ install_leptonica(){
         return 2
     fi
 
+    printf \
+        'Info: Running the install target of the Leptonica makefile...\n'
     if ! make install; then
         printf \
             'Error: Unable to run the install target of the Leptonica makefile.\n' \
