@@ -127,6 +127,11 @@ Here are some third-party resources that are referenced during the development o
   Explains the specifics of building Leptonica from the source code.
 * [Git - git-describe Documentation](https://git-scm.com/docs/git-describe)  
   Explains the command-line options of the `git describe` command.
+* [Compilation guide for various platforms | tessdoc](https://tesseract-ocr.github.io/tessdoc/Compiling.html)  
+  Explain the specifics of building Tesseract from its source code.
+* [‎autogen.sh: Automating build setup | Google Gemini](https://gemini.google.com/share/badbb251c590)  
+  [Autogen.sh in Software Development | OpenAI ChatGPT](https://chat.openai.com/share/e35e3f49-fafe-4ece-9b5b-e9aea523def5)  
+  Explains the usage of the autogen.sh program.
 
 ## Licensing
 

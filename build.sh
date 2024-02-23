@@ -265,8 +265,190 @@ init(){
         exit 2
     fi
 
+    local tesseract_build_dir="${build_basedir}/tesseract"
+    if ! configure_tesseract_build \
+        "${tesseract_source_dir}" \
+        "${tesseract_build_dir}" \
+        "${tesseract_orange_prefix}"; then
+        printf \
+            'Error: Unable to configure the Tesseract build.\n' \
+            1>&2
+        exit 2
+    fi
+
     print_progress \
         'Operation completed without errors.'
+}
+
+# Configure the build of the Tesseract software
+#
+# Return values:
+#
+# * 0: Operation successful
+# * 1: Prerequisite not met
+# * 2: Generic error
+configure_tesseract_build(){
+    local source_dir="${1}"; shift
+    local build_dir="${1}"; shift
+    local tesseract_orange_prefix="${1}"; shift
+
+    print_progress 'Configuring the Tesseract build...'
+
+    if ! check_package_manager_commands; then
+        printf \
+            '%s: Error: Package manager command check failed.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 1
+    fi
+
+    local distro_id
+    if ! distro_id="$(get_distro_identifier)"; then
+        printf \
+            'Error: Unable to query the operating system distribution identifier.\n' \
+            1>&2
+        return 2
+    fi
+
+    local build_dependency_packages_missing=false
+    local -a build_dependency_pkgs=(
+        # The GNU build system used for building Tesseract
+        autoconf
+        automake
+        libtool
+
+        # C++ compiler
+        g++
+
+        # For locating depending library installations
+        pkg-config
+
+        # For compressed model files support
+        libarchive-dev
+
+        # For building training tools
+        libcairo2-dev
+        libicu-dev
+        libpango1.0-dev
+
+        # For image URL processing support
+        libcurl4-openssl-dev
+
+        # For OpenCL support
+        ocl-icd-opencl-dev
+    )
+    case "${distro_id}" in
+        debian|ubuntu)
+            if ! dpkg --status "${build_dependency_pkgs[@]}" &>/dev/null; then
+                build_dependency_packages_missing=true
+            fi
+        ;;
+        *)
+            printf \
+                'Error: Operating system distribution(ID=%s) not supported.\n' \
+                "${distro_id}" \
+                1>&2
+            return 1
+        ;;
+    esac
+
+    if test "${build_dependency_packages_missing}" == true; then
+        printf \
+            'Info: Installing the build dependency packages for the Tesseract software...\n'
+
+        case "${distro_id}" in
+            debian|ubuntu)
+                if ! apt-get install -y "${build_dependency_pkgs[@]}"; then
+                    printf \
+                        'Error: Unable to install the build dependency packages for the Tesseract software.\n' \
+                        1>&2
+                    return 2
+                fi
+            ;;
+            *)
+                printf \
+                    '%s: Error: Operating system distribution(ID=%s) not supported.\n' \
+                    "${FUNCNAME[1]}" \
+                    "${distro_id}" \
+                    1>&2
+                return 1
+            ;;
+        esac
+    fi
+
+    printf \
+        'Info: Changing the working directory to the Tesseract source directory...\n'
+    if ! cd "${source_dir}"; then
+        printf \
+            'Error: Unable to change the working directory to the Tesseract source directory(%s).\n' \
+            "${source_dir}" \
+            1>&2
+        return 2
+    fi
+
+    printf \
+        'Running the GNU Autotools build system file generation program of the Tesseract software...\n'
+    if ! "${source_dir}/autogen.sh"; then
+        printf \
+            'Error: Unable to run the GNU Autotools build system file generation program of the Tesseract software.\n' \
+            1>&2
+        return 1
+    fi
+
+    if ! test -e "${build_dir}"; then
+        printf \
+            'Info: Creating the Tesseract build directory...\n'
+        if ! mkdir "${build_dir}"; then
+            printf \
+                'Error: Unable to create the Tesseract build directory.\n' \
+                1>&2
+            return 2
+        fi
+    fi
+
+    printf \
+        'Info: Changing the working directory to the Tesseract build directory...\n'
+    if ! cd "${build_dir}"; then
+        printf \
+            'Error: Unable to change the working directory to the Tesseract build directory(%s).\n' \
+            "${build_dir}" \
+            1>&2
+        return 2
+    fi
+
+    printf \
+        'Info: Running the Tesseract build configuration program...\n'
+    local -a configure_envs=(
+        PKG_CONFIG_PATH="${tesseract_orange_prefix}/lib/pkgconfig"
+    )
+    local -a configure_opts=(
+        # Specify the installation path prefix
+        --prefix="${tesseract_orange_prefix}"
+
+        # Disable development feature to speed up one time build
+        --disable-dependency-tracking
+        --disable-debug
+
+        # Don't build unused documentation files to speed up build
+        --disable-doc
+
+        # Enable experimental OpenCL acceleration
+        --enable-opencl
+
+        # Don't build unused static libraries to speed up build
+        --disable-static
+
+    )
+    if ! env "${configure_envs[@]}" \
+        "${source_dir}/configure" "${configure_opts[@]}"; then
+        printf \
+            'Error: Unable to run the Tesseract build configuration program.\n' \
+            1>&2
+        return 2
+    fi
+
+    printf \
+        'Info: Tesseract build configured successfully.\n'
 }
 
 # Download and cache the Tesseract source archive file
