@@ -191,7 +191,8 @@ init(){
     local leptonica_build_dir="${build_basedir}/leptonica"
     if ! configure_leptonica_build \
         "${leptonica_source_dir}" \
-        "${leptonica_build_dir}"; then
+        "${leptonica_build_dir}" \
+        "${tesseract_orange_prefix}"; then
         printf \
             'Error: Unable to configure the Leptonica build.\n' \
             1>&2
@@ -385,6 +386,7 @@ build_leptonica(){
 configure_leptonica_build(){
     local leptonica_source_dir="${1}"; shift
     local leptonica_build_dir="${1}"; shift
+    local install_prefix="${1}"; shift
 
     print_progress 'Configuring the Leptonica build...'
 
@@ -507,6 +509,9 @@ configure_leptonica_build(){
         CFLAGS=-O2
     )
     local -a leptonica_configure_opts=(
+        # Specify the installation directory path prefix
+        --prefix="${install_prefix}"
+
         # Disable developer options that slow down the build
         --disable-dependency-tracking
 
