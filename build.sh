@@ -276,6 +276,13 @@ init(){
         exit 2
     fi
 
+    if ! build_tesseract "${tesseract_build_dir}"; then
+        printf \
+            'Error: Unable to build the Tesseract software from its source code.\n' \
+            1>&2
+        exit 2
+    fi
+
     print_progress \
         'Operation completed without errors.'
 }
@@ -449,6 +456,71 @@ configure_tesseract_build(){
 
     printf \
         'Info: Tesseract build configured successfully.\n'
+}
+
+# Build Tesseract from its source code
+#
+# Return values:
+#
+# * 0: Operation successful
+# * 1: Prerequisite not met
+# * 2: Generic error
+build_tesseract(){
+    local build_dir="${1}"; shift
+
+    print_progress 'Building Tesseract from its source code...'
+
+    if ! cd "${build_dir}"; then
+        printf \
+            'Error: Unable to change the working directory to the Tesseract build directory(%s).\n' \
+            "${build_dir}" \
+            1>&2
+        return 2
+    fi
+
+    local -i cpu_cores
+    if ! cpu_cores="$(nproc)"; then
+        printf \
+            'Error: Unable to query the number of the CPU cores.\n' \
+            1>&2
+        return 2
+    fi
+
+    printf \
+        'Info: Running the default make recipe...\n'
+    local -a make_opts=(
+        --jobs="${cpu_cores}"
+    )
+    if ! make "${make_opts[@]}"; then
+        printf \
+            'Error: Unable to run the default make recipe.\n' \
+            1>&2
+        return 2
+    fi
+
+    printf \
+        'Info: Running the default make recipe...\n'
+    local -a make_opts=(
+        --jobs="${cpu_cores}"
+    )
+    if ! make "${make_opts[@]}"; then
+        printf \
+            'Error: Unable to run the default make recipe.\n' \
+            1>&2
+        return 2
+    fi
+
+    printf \
+        'Info: Running the "training" make recipe...\n'
+    if ! make "${make_opts[@]}" training; then
+        printf \
+            'Error: Unable to run the "training" make recipe.\n' \
+            1>&2
+        return 2
+    fi
+
+    printf \
+        'Info: Tesseract build successfully.\n'
 }
 
 # Download and cache the Tesseract source archive file
