@@ -339,3 +339,35 @@ get_distro_identifier(){
 
     printf '%s' "${ID}"
 }
+
+# Determine the operating system distribution version of the current
+# system
+# Standard output: Result operating system distribution identifier
+#
+# Return values:
+#
+# * 0: OS identifier found
+# * 1: Prerequisite not met
+# * 2: Generic error
+get_distro_version(){
+    local operating_system_information_file=/etc/os-release
+
+    # shellcheck source=/etc/os-release
+    if ! source "${operating_system_information_file}"; then
+        printf \
+            '%s: Error: Unable to load the operating system information file.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 1
+    fi
+
+    if ! test -v VERSION_ID; then
+        printf \
+            'Error: The VERSION_ID variable assignment not found from the operating system information file(%s).\n' \
+            "${operating_system_information_file}" \
+            1>&2
+        return 2
+    fi
+
+    printf '%s' "${VERSION_ID}"
+}
