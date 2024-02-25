@@ -47,7 +47,7 @@ init(){
     local -a base_runtime_dependency_pkgs=(
         coreutils
     )
-    if ! dpkg -s "${base_runtime_dependency_pkgs[@]}" &>/dev/null; then
+    if ! check_distro_packages_installed "${base_runtime_dependency_pkgs[@]}"; then
         print_progress 'Installing base runtime dependency packages...'
         if ! \
             apt-get install \
@@ -371,7 +371,7 @@ configure_tesseract_build(){
     )
     case "${distro_id}" in
         debian|ubuntu)
-            if ! dpkg --status "${build_dependency_pkgs[@]}" &>/dev/null; then
+            if ! check_distro_packages_installed "${build_dependency_pkgs[@]}"; then
                 build_dependency_packages_missing=true
             fi
         ;;
@@ -819,7 +819,7 @@ configure_leptonica_build(){
     )
     case "${distro_id}" in
         debian|ubuntu)
-            if ! dpkg --status "${leptonica_build_dependency_pkgs[@]}" &>/dev/null; then
+            if ! check_distro_packages_installed "${leptonica_build_dependency_pkgs[@]}"; then
                 build_dependency_packages_missing=true
             fi
         ;;
@@ -1023,7 +1023,7 @@ query_latest_leptonica_version_ensure_deps(){
         curl
         jq
     )
-    if ! dpkg --status "${runtime_dependency_pkgs[@]}" &>/dev/null; then
+    if ! check_distro_packages_installed "${runtime_dependency_pkgs[@]}"; then
         printf \
             'Info: Installing runtime dependencies for the "query_latest_leptonica_version" function...\n'
         if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
@@ -1083,7 +1083,7 @@ query_latest_tesseract_version_ensure_deps(){
         curl
         jq
     )
-    if ! dpkg --status "${runtime_dependency_pkgs[@]}" &>/dev/null; then
+    if ! check_distro_packages_installed "${runtime_dependency_pkgs[@]}"; then
         printf \
             'Info: Installing runtime dependencies for the query_latest_tesseract_version function...\n'
         if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
@@ -1279,7 +1279,7 @@ list_archive_memebers_ensure_deps(){
 
     case "${distro_id}" in
         debian|ubuntu)
-            if ! dpkg --status "${runtime_dependency_pkgs[@]}" &>/dev/null; then
+            if ! check_distro_packages_installed "${runtime_dependency_pkgs[@]}"; then
                 runtime_dependency_packages_missing=true
             fi
         ;;
@@ -1451,7 +1451,7 @@ extract_software_archive_ensure_deps(){
 
     case "${distro_id}" in
         debian|ubuntu)
-            if ! dpkg --status "${runtime_dependency_pkgs[@]}" &>/dev/null; then
+            if ! check_distro_packages_installed "${runtime_dependency_pkgs[@]}"; then
                 runtime_dependency_packages_missing=true
             fi
         ;;
@@ -1753,7 +1753,7 @@ determine_tesseract_orange_version_ensure_deps(){
 
     case "${distro_id}" in
         debian|ubuntu)
-            if ! dpkg --status "${runtime_dependency_pkgs[@]}" &>/dev/null; then
+            if ! check_distro_packages_installed "${runtime_dependency_pkgs[@]}"; then
                 runtime_dependency_packages_missing=true
             fi
         ;;
@@ -1891,7 +1891,7 @@ determine_url_download_filename_ensure_deps(){
 
     case "${distro_id}" in
         debian|ubuntu)
-            if ! dpkg --status "${runtime_dependency_pkgs[@]}" &>/dev/null; then
+            if ! check_distro_packages_installed "${runtime_dependency_pkgs[@]}"; then
                 runtime_dependency_packages_missing=true
             fi
         ;;
