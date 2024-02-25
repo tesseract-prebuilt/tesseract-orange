@@ -49,10 +49,7 @@ init(){
     )
     if ! check_distro_packages_installed "${base_runtime_dependency_pkgs[@]}"; then
         print_progress 'Installing base runtime dependency packages...'
-        if ! \
-            apt-get install \
-                -y \
-                "${base_runtime_dependency_pkgs[@]}"; then
+        if ! install_distro_packages "${base_runtime_dependency_pkgs[@]}"; then
             printf \
                 'Error: Unable to install the base runtime dependency packages.\n' \
                 1>&2
@@ -390,7 +387,7 @@ configure_tesseract_build(){
 
         case "${distro_id}" in
             debian|ubuntu)
-                if ! apt-get install -y "${build_dependency_pkgs[@]}"; then
+                if ! install_distro_packages "${build_dependency_pkgs[@]}"; then
                     printf \
                         'Error: Unable to install the build dependency packages for the Tesseract software.\n' \
                         1>&2
@@ -838,7 +835,7 @@ configure_leptonica_build(){
 
         case "${distro_id}" in
             debian|ubuntu)
-                if ! apt-get install -y "${leptonica_build_dependency_pkgs[@]}"; then
+                if ! install_distro_packages "${leptonica_build_dependency_pkgs[@]}"; then
                     printf \
                         'Error: Unable to install the build dependency packages for the Leptonica software.\n' \
                         1>&2
@@ -1026,7 +1023,7 @@ query_latest_leptonica_version_ensure_deps(){
     if ! check_distro_packages_installed "${runtime_dependency_pkgs[@]}"; then
         printf \
             'Info: Installing runtime dependencies for the "query_latest_leptonica_version" function...\n'
-        if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
+        if ! install_distro_packages "${runtime_dependency_pkgs[@]}"; then
             printf \
                 'Error: Unable to install the runtime dependencies packages for the "query_latest_leptonica_version" function.\n' \
                 1>&2
@@ -1086,7 +1083,7 @@ query_latest_tesseract_version_ensure_deps(){
     if ! check_distro_packages_installed "${runtime_dependency_pkgs[@]}"; then
         printf \
             'Info: Installing runtime dependencies for the query_latest_tesseract_version function...\n'
-        if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
+        if ! install_distro_packages "${runtime_dependency_pkgs[@]}"; then
             printf \
                 'Error: Unable to install the runtime dependencies packages for the query_latest_tesseract_version function.\n' \
                 1>&2
@@ -1300,7 +1297,7 @@ list_archive_memebers_ensure_deps(){
 
         case "${distro_id}" in
             debian|ubuntu)
-                if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
+                if ! install_distro_packages "${runtime_dependency_pkgs[@]}"; then
                     printf \
                         'Error: Unable to install the runtime dependency packages for the "%s" function.\n' \
                         "${FUNCNAME[1]}" \
@@ -1472,7 +1469,7 @@ extract_software_archive_ensure_deps(){
 
         case "${distro_id}" in
             debian|ubuntu)
-                if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
+                if ! install_distro_packages "${runtime_dependency_pkgs[@]}"; then
                     printf \
                         'Error: Unable to install the runtime dependency packages for the "%s" function.\n' \
                         "${FUNCNAME[1]}" \
@@ -1773,7 +1770,7 @@ determine_tesseract_orange_version_ensure_deps(){
 
         case "${distro_id}" in
             debian|ubuntu)
-                if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
+                if ! install_distro_packages "${runtime_dependency_pkgs[@]}"; then
                     printf \
                         'Error: Unable to install the runtime dependency packages for the determine_tesseract_orange_version function.\n' \
                         1>&2
@@ -1911,7 +1908,7 @@ determine_url_download_filename_ensure_deps(){
 
         case "${distro_id}" in
             debian|ubuntu)
-                if ! apt-get install -y "${runtime_dependency_pkgs[@]}"; then
+                if ! install_distro_packages "${runtime_dependency_pkgs[@]}"; then
                     printf \
                         'Error: Unable to install the runtime dependency packages for the determine_url_download_filename function.\n' \
                         1>&2

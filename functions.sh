@@ -419,6 +419,69 @@ check_distro_packages_installed(){
     esac
 }
 
+# Install specified distribution packages using distro-specific
+# interfaces
+#
+# Return values:
+#
+# * 0: Operation completed successfully
+# * 1: Prerequisite failed
+# * 2: Generic error
+# * 3: Install failed
+install_distro_packages(){
+    if test "${#}" -eq 0; then
+        printf \
+            '%s: FATAL: No packages are specified as the function arguments.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        exit 99
+    else
+        local -a packages=("${@}"); set --
+    fi
+
+    if ! check_running_user; then
+        printf \
+            '%s: Error: The running user check has failed.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 1
+    fi
+
+    local distro_id
+    if ! distro_id="$(get_distro_identifier)"; then
+        printf \
+            '%s: Error: Unable to query the operating system distribution identifier of the current system.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 2
+    fi
+
+    case "${distro_id}" in
+        debian|ubuntu)
+            if ! apt-get install \
+                -y \
+                "${packages[@]}"; then
+                printf \
+                    'Error: The installation of the specified packages has failed.\n' \
+                    1>&2
+                return 2
+            else
+                printf \
+                    'Info: Package installation successful.\n'
+                return 0
+            fi
+        ;;
+        *)
+            printf \
+                '%s: Error: The operating system distribution(ID=%s) is not supported.\n' \
+                "${FUNCNAME[0]}" \
+                "${distro_id}" \
+                1>&2
+            return 1
+        ;;
+    esac
+}
+
 # Check whether the running user is acceptible
 #
 # Return values:
