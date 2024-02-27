@@ -36,7 +36,7 @@ This section documents the prerequisites of the product building container:
 * Ubuntu 22.04  
   The operating system image of the builder container, other recent versions of Ubuntu/Debian may be compatible but those are not tested as of now.  Other Linux distributions may be supported if there's a large userbase(patches welcome!)
 
-## Environment variables that will change the prodoct builder's behavior
+## Environment variables that can change the prodoct builder's behaviors
 
 ### APT_SWITCH_LOCAL_MIRROR
 
