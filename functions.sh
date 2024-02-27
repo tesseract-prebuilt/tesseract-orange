@@ -151,6 +151,9 @@ prepare_software_sources(){
     if test -v CI; then
         printf \
             'Info: CI environment detected, will not attempt to change the software sources.\n'
+    elif test "${distro_id}" != ubuntu; then
+        printf \
+            'Info: Non-Ubuntu distribution detected, will not attempt to change the software sources.\n'
     else
         local -a mirror_patch_dependency_pkgs=(
             # For sending HTTP request to third-party IP address lookup
