@@ -304,6 +304,20 @@ init(){
         exit 2
     fi
 
+    local packaging_assets_dir="${product_dir}/packaging-assets"
+    if ! create_deployment_package \
+        "${product_dir}" \
+        "${packaging_assets_dir}" \
+        "${tesseract_orange_prefix}" \
+        "${tesseract_orange_version}" \
+        "${tesseract_version}" \
+        "${temp_dir}"; then
+        printf \
+            'Error: Unable to create the deployment package.\n' \
+            1>&2
+        exit 2
+    fi
+
     print_progress \
         'Operation completed without errors.'
 }
@@ -477,6 +491,149 @@ configure_tesseract_build(){
 
     printf \
         'Info: Tesseract build configured successfully.\n'
+}
+
+# Create the deployment package from the files in the Tesseract Orange
+# installation path prefix to the product directory
+#
+# Return values:
+#
+# * 0: Operation successful
+# * 1: Prerequisite not met
+# * 2: Generic error
+create_deployment_package(){
+    local product_dir="${1}"; shift
+    local packaging_assets_dir="${1}"; shift
+    local tesseract_orange_prefix="${1}"; shift
+    local tesseract_orange_version="${1}"; shift
+    local tesseract_version="${1}"; shift
+    local temp_dir="${1}"; shift
+
+    print_progress 'Creating the deployment package...'
+
+    local -a runtime_dependency_pkgs=(
+        # For generating the product installation program from its
+        # template
+        sed
+
+        # For generating the distribution archive
+        tar
+
+        # For reducing the file size of the distribution archive
+        xz-utils
+    )
+    if ! check_distro_packages_installed "${runtime_dependency_pkgs[@]}"; then
+        printf \
+            'Info: Installing the runtime dependency packages for the "%s" function...\n' \
+            "${FUNCNAME[0]}"
+        if ! install_distro_packages "${runtime_dependency_pkgs[@]}"; then
+            printf \
+                'Error: Unable to install the runtime dependency packages for the "%s" function...\n' \
+                "${FUNCNAME[0]}" \
+                1>&2
+            return 2
+        fi
+    fi
+
+    printf \
+        'Info: Loading the builder host hostname...\n'
+    local \
+        hostname_file=/etc/hostname \
+        builder_host_hostname_file=/etc/hostname.builder-host \
+        builder_host_hostname
+    if test -e "${builder_host_hostname_file}"; then
+        builder_host_hostname="$(<"${builder_host_hostname_file}")"
+    elif test -e "${hostname_file}"; then
+        printf \
+            'Warning: The builder host hostname file does not exist, using current hostname file as a fallback.\n' \
+            1>&2
+        builder_host_hostname="$(<"${hostname_file}")"
+    else
+        builder_host_hostname=unknown
+    fi
+
+    printf \
+        'Info: Generating the product installation program from its template...\n'
+    local \
+        installation_program_template="${packaging_assets_dir}/install.sh.in" \
+        installation_program="${temp_dir}/install.sh"
+    local -a sed_opts=(
+        --regexp-extended
+        --expression="0,/__TESSERACT_ORANGE_PREFIX__/ s@__TESSERACT_ORANGE_PREFIX__@${tesseract_orange_prefix}@g"
+    )
+    if ! sed \
+            "${sed_opts[@]}" \
+            "${installation_program_template}" \
+            >"${installation_program}"; then
+        printf \
+            'Error: Unable to generate the product installation program from its template.\n' \
+            1>&2
+        return 2
+    fi
+
+    printf \
+        'Info: Fixing the installation program executable permission...\n'
+    if ! chmod a+x "${installation_program}"; then
+        printf \
+            'Error: Unable to fix the installation program executable permission.\n' \
+            1>&2
+        return 2
+    fi
+
+    printf \
+        'Info: Determining the release identifier...\n'
+    local release_id="tesseract-orange-${tesseract_orange_version}-t${tesseract_version}-for-${builder_host_hostname}"
+    printf \
+        'Info: The release identifier determined to be "%s".\n' \
+        "${release_id}"
+
+    printf \
+        'Info: Creating the deployment package using the tar(1) utility...\n'
+    local -a xz_opts=(
+        # Use multiple threads for compression
+        -T0
+    )
+    local -a tar_opts=(
+        --create
+        --xz
+        --verbose
+        --file="${product_dir}/${release_id}.tar.xz"
+
+        # We don't actually use absolute paths in the dpeloyment package
+        # , this is for disabling the default behavior which transforms
+        # the leading slash character before we have the chance to do
+        # it ourselves...
+        --absolute-names
+
+        # Convert the installation prefix directory itself
+        --transform="s@^$(convert_path_to_regex "${tesseract_orange_prefix}")\$@${release_id}/built-product@x"
+
+        # Convert the installation prefix content
+        --transform="s@^$(convert_path_to_regex "${tesseract_orange_prefix}")/@${release_id}/built-product/@x"
+
+        # Convert product installation program
+        --transform="s@^$(convert_path_to_regex "${temp_dir}")/@${release_id}/@x"
+
+        # Convert the common functions file
+        --transform="s@^$(convert_path_to_regex "${product_dir}")/@${release_id}/@x"
+
+        # Show converted archive paths instead of source paths
+        --show-transformed-names
+    )
+    if ! XZ_OPT="${xz_opts[*]}" \
+        tar \
+            "${tar_opts[@]}" \
+            "${tesseract_orange_prefix}" \
+            "${temp_dir}/install.sh" \
+            "${product_dir}/functions.sh"; then
+        printf \
+            'Error: Unable to create the deployment package using the tar(1) utility.\n' \
+            1>&2
+        return 2
+    fi
+
+    printf \
+        'Info: Operation completed successfully.\n'
 }
 
 # Install the Tesseract software to the installation prefix directory

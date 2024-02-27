@@ -145,6 +145,12 @@ Here are some third-party resources that are referenced during the development o
 * [‎autogen.sh: Automating build setup | Google Gemini](https://gemini.google.com/share/badbb251c590)  
   [Autogen.sh in Software Development | OpenAI ChatGPT](https://chat.openai.com/share/e35e3f49-fafe-4ece-9b5b-e9aea523def5)  
   Explains the usage of the autogen.sh program.
+* [GNU tar manual: Modifying File and Member Names](https://www.gnu.org/software/tar/manual/html_node/transform.html)  
+  Explains how to transform the whole file names of the archive members while creating the deploy package archive.
+* [zip - How to use multi-threading for creating and extracting tar.xz - Unix & Linux Stack Exchange](https://unix.stackexchange.com/questions/608207/how-to-use-multi-threading-for-creating-and-extracting-tar-xz)  
+  Explains how to enable the multi-threading functionality of the `xz` program to cut down deployment package creation time.
+* [ENVIRONMENT: man xz (1): Compress or decompress .xz and .lzma files](https://manpages.org/xz#environment)  
+  Explains the differences between the `XZ_OPT` and `XZ_DEFAULTS` environment variables.
 
 ## Licensing
 
