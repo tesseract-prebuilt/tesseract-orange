@@ -118,13 +118,14 @@ printf \
     'Info: The operating system distribution identifier of this system is "%s".\n' \
     "${distro_id}"
 
-print_progress \
-    'Ensuring the product installer dependencies...'
 installer_dependency_pkgs=(
     # For installing product files while preserving original metadata
     rsync
 )
 if ! check_distro_packages_installed "${installer_dependency_pkgs[@]}"; then
+    print_progress \
+        'Ensuring the product installer dependencies...'
+
     printf \
         'Info: Installing the product installer dependencies packages...\n'
     if ! install_distro_packages "${installer_dependency_pkgs[@]}"; then
