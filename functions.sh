@@ -151,9 +151,6 @@ prepare_software_sources(){
         return 1
     fi
 
-    # Silence warnings regarding unavailable debconf frontends
-    export DEBIAN_FRONTEND=noninteractive
-
     local apt_archive_cache_mtime_epoch
     if ! apt_archive_cache_mtime_epoch="$(
         stat \
@@ -202,10 +199,10 @@ prepare_software_sources(){
             # For patching APT software source definition list
             sed
         )
-        if ! dpkg --status "${mirror_patch_dependency_pkgs[@]}" &>/dev/null; then
+        if ! check_distro_packages_installed "${mirror_patch_dependency_pkgs[@]}"; then
             printf \
                 'Info: Installing the runtime dependencies packages for the mirror patching functionality...\n'
-            if ! apt-get install -y "${mirror_patch_dependency_pkgs[@]}"; then
+            if ! install_distro_packages "${mirror_patch_dependency_pkgs[@]}"; then
                 printf \
                     'Error: Unable to install the runtime dependencies packages for the mirror patching functionality.\n' \
                     1>&2
