@@ -41,9 +41,6 @@ init(){
         exit 1
     fi
 
-    # Silence warnings regarding unavailable debconf frontends
-    export DEBIAN_FRONTEND=noninteractive
-
     local -a base_runtime_dependency_pkgs=(
         coreutils
     )

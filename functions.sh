@@ -458,6 +458,9 @@ install_distro_packages(){
 
     case "${distro_id}" in
         debian|ubuntu)
+            # Silence warnings regarding unavailable debconf frontends
+            export DEBIAN_FRONTEND=noninteractive
+
             if ! apt-get install \
                 -y \
                 "${packages[@]}"; then
