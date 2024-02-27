@@ -118,32 +118,6 @@ check_package_manager_commands(){
 prepare_software_sources(){
     print_progress 'Preparing software sources...'
 
-    local -a required_commands=(
-        # For determining the current time
-        date
-
-        # For determining the APT local cache creation time
-        stat
-    )
-    local required_command_check_failed=false
-    for command in "${required_commands[@]}"; do
-        if ! command -v "${command}" >/dev/null; then
-            printf \
-                '%s: Error: This function requires the "%s" command to be available in your command search PATHs.\n' \
-                "${FUNCNAME[0]}" \
-                "${command}" \
-                1>&2
-            required_command_check_failed=true
-        fi
-    done
-    if test "${required_command_check_failed}" == true; then
-        printf \
-            '%s: Error: Required command check failed.\n' \
-            "${FUNCNAME[0]}" \
-            1>&2
-        return 1
-    fi
-
     if ! check_package_manager_commands; then
         printf \
             'Error: Package manager command check failed.\n' \
@@ -151,34 +125,24 @@ prepare_software_sources(){
         return 1
     fi
 
-    local apt_archive_cache_mtime_epoch
-    if ! apt_archive_cache_mtime_epoch="$(
-        stat \
-            --format=%Y \
-            /var/cache/apt/archives
-        )"; then
+    local distro_id
+    printf \
+        'Info: Determining the operating system distribution identifier...\n'
+    if ! distro_id="$(get_distro_identifier)"; then
         printf \
-            'Error: Unable to query the modification time of the APT software sources cache directory.\n' \
+            'Error: Unable to determine the operating system distribution identifier.\n' \
             1>&2
         return 2
     fi
+    printf \
+        'Info: The operating system distribution identifier determined to be "%s".' \
+        "${distro_id}"
 
-    local current_time_epoch
-    if ! current_time_epoch="$(
-        date +%s
-        )"; then
-        printf \
-            'Error: Unable to query the current time.\n' \
-            1>&2
-        return 2
-    fi
-
-    if test "$((current_time_epoch - apt_archive_cache_mtime_epoch))" -ge 86400; then
-        printf \
-            'Info: Refreshing the APT local package cache...\n'
-        if ! apt-get update; then
+    local regex_debian_distro_ids='^(debian|ubuntu)$'
+    if [[ "${distro_id}" =~ ${regex_debian_distro_ids} ]]; then
+        if ! refresh_apt_local_cache; then
             printf \
-                'Error: Unable to refresh the APT local package cache.\n' \
+                "Error: Unable to refresh the APT software management system's local cache.\\n" \
                 1>&2
             return 2
         fi
@@ -531,5 +495,68 @@ check_running_user(){
         printf \
             'Info: The running user is acceptible(%s).\n' \
             "${running_user}"
+    fi
+}
+
+# Generate or refresh the APT software management system's local cache
+# when necessary
+refresh_apt_local_cache(){
+    local -a required_commands=(
+        # For determining the current time
+        date
+
+        # For determining the APT local cache creation time
+        stat
+    )
+    local required_command_check_failed=false
+    for command in "${required_commands[@]}"; do
+        if ! command -v "${command}" >/dev/null; then
+            printf \
+                '%s: Error: This function requires the "%s" command to be available in your command search PATHs.\n' \
+                "${FUNCNAME[0]}" \
+                "${command}" \
+                1>&2
+            required_command_check_failed=true
+        fi
+    done
+    if test "${required_command_check_failed}" == true; then
+        printf \
+            '%s: Error: Required command check failed.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 1
+    fi
+
+    local apt_archive_cache_mtime_epoch
+    if ! apt_archive_cache_mtime_epoch="$(
+        stat \
+            --format=%Y \
+            /var/cache/apt/archives
+        )"; then
+        printf \
+            'Error: Unable to query the modification time of the APT software sources cache directory.\n' \
+            1>&2
+        return 2
+    fi
+
+    local current_time_epoch
+    if ! current_time_epoch="$(
+        date +%s
+        )"; then
+        printf \
+            'Error: Unable to query the current time.\n' \
+            1>&2
+        return 2
+    fi
+
+    if test "$((current_time_epoch - apt_archive_cache_mtime_epoch))" -ge 86400; then
+        printf \
+            'Info: Refreshing the APT local package cache...\n'
+        if ! apt-get update; then
+            printf \
+                'Error: Unable to refresh the APT local package cache.\n' \
+                1>&2
+            return 2
+        fi
     fi
 }
