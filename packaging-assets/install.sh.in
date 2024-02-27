@@ -285,6 +285,9 @@ else
         # Metadata manipulation
         --chown=root:root
 
+        # File system traversal behavior
+        --recursive
+
         # Output manipulation
         --human-readable
         --human-readable
