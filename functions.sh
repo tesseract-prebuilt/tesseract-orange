@@ -116,7 +116,18 @@ check_package_manager_commands(){
 
 
 prepare_software_sources(){
+    local apt_switch_local_mirror="${1}"; shift
+
     print_progress 'Preparing software sources...'
+
+    local regex_boolean_values='^(true|false)$'
+    if ! [[ "${apt_switch_local_mirror}" =~ ${regex_boolean_values} ]]; then
+        printf \
+            "%s: FATAL: The \"apt_switch_local_mirror\" function parameter's value can only be either \"true\" or \"false\".\\n" \
+            "${FUNCNAME[0]}" \
+            1>&2
+        exit 99
+    fi
 
     if ! check_package_manager_commands; then
         printf \
@@ -154,6 +165,9 @@ prepare_software_sources(){
     elif test "${distro_id}" != ubuntu; then
         printf \
             'Info: Non-Ubuntu distribution detected, will not attempt to change the software sources.\n'
+    elif test "${apt_switch_local_mirror}" == false; then
+        printf \
+            'Info: The APT_SWITCH_LOCAL_MIRROR environment variable is set to "false", will not attempt to change the software sources.\n'
     else
         local -a mirror_patch_dependency_pkgs=(
             # For sending HTTP request to third-party IP address lookup

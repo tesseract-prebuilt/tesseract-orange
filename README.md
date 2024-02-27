@@ -38,6 +38,19 @@ This section documents the prerequisites of the product building container:
 
 ## Environment variables that will change the prodoct builder's behavior
 
+### APT_SWITCH_LOCAL_MIRROR
+
+Whether to enable the functionality to automatically switching to a local APT software management system software mirror
+
+#### Accepted values
+
+* `false`: Disable functionality
+* `true`: Enable functionality
+
+#### Default value
+
+`true`
+
 ### LEPTONICA_VERSION
 
 Determine [which version of Leptonica](https://github.com/DanBloomberg/leptonica/releases) to build.

@@ -11,6 +11,8 @@ TESSERACT_ORANGE_PREFIX="${TESSERACT_ORANGE_PREFIX:-/opt/tesseract-orange-_TESSE
 LEPTONICA_VERSION="${LEPTONICA_VERSION:-latest}"
 LEPTONICA_SOURCE_ARCHIVE_URL="${LEPTONICA_SOURCE_ARCHIVE_URL:-"https://github.com/DanBloomberg/leptonica/releases/download/${LEPTONICA_VERSION}/leptonica-${LEPTONICA_VERSION}.tar.gz"}"
 
+APT_SWITCH_LOCAL_MIRROR="${APT_SWITCH_LOCAL_MIRROR:-true}"
+
 init(){
     local common_functions_file="${script_dir}/functions.sh"
     if ! test -e "${common_functions_file}"; then
@@ -54,7 +56,7 @@ init(){
         fi
     fi
 
-    if ! prepare_software_sources; then
+    if ! prepare_software_sources "${APT_SWITCH_LOCAL_MIRROR}"; then
         printf \
             'Error: Unable to prepare the software sources.\n' \
             1>&2
