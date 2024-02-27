@@ -293,7 +293,12 @@ else
         --human-readable
         --verbose
     )
-    if ! rsync "${rsync_opts[@]}" "${built_product_dir}/" "${TESSERACT_ORANGE_PREFIX}"; then
+    if ! rsync \
+        "${rsync_opts[@]}" \
+        "${built_product_dir}/" \
+        "${script_dir}/functions.sh" \
+        "${script_dir}/install.sh" \
+        "${TESSERACT_ORANGE_PREFIX}"; then
         printf \
             'Error: Unable to install the product files.\n' \
             1>&2
