@@ -190,7 +190,7 @@ prepare_software_sources(){
                     https://ipinfo.io/json
             )"; then
             printf \
-                'Warning: Unable to detect the local region code(IP address reverse lookup service not available), falling back to default.\n' \
+                'Warning: Unable to detect the local region code(IP address reverse lookup service not available), falling back to the default.\n' \
                 1>&2
             region_code=
         else
