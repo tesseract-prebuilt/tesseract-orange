@@ -118,6 +118,17 @@ printf \
     'Info: The operating system distribution identifier of this system is "%s".\n' \
     "${distro_id}"
 
+regex_debian_distro_ids='^(debian|ubuntu)$'
+if [[ "${distro_id}" =~ ${regex_debian_distro_ids} ]]; then
+    print_progress "Refreshing the APT software management system's local data cache..."
+    if ! refresh_apt_local_cache; then
+        printf \
+            "Error: Unable to refresh the APT software management system's local data cache.\\n" \
+            1>&2
+        exit 2
+    fi
+fi
+
 installer_dependency_pkgs=(
     # For installing product files while preserving original metadata
     rsync
