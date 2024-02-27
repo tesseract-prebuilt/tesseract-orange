@@ -146,7 +146,7 @@ prepare_software_sources(){
         return 2
     fi
     printf \
-        'Info: The operating system distribution identifier determined to be "%s".' \
+        'Info: The operating system distribution identifier determined to be "%s".\n' \
         "${distro_id}"
 
     local regex_debian_distro_ids='^(debian|ubuntu)$'
