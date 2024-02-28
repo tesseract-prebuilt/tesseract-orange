@@ -33,8 +33,7 @@ This section documents the prerequisites of the product building container:
 
 * GNU Bash  
   The runtime interpreter of the build program.  **Requires version >= 4.3**(name reference variable support to be specific).
-* Ubuntu 22.04  
-  The operating system image of the builder container, other recent versions of Ubuntu/Debian may be compatible but those are not tested as of now.  Other Linux distributions may be supported if there's a large userbase(patches welcome!)
+* A supported operating system image that is the same/compatible with the builder host's system, currently supporting Ubuntu 22.04/23.10.  This product is designed with cross-platform compatibility in mind thus it may be possible to port it to other Linux distributions as well, patches welcome!
 
 ## Environment variables that can change the prodoct builder's behaviors
 
