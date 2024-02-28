@@ -112,83 +112,67 @@ This section documents the prerequisites of the product building container:
 
 Whether to enable the functionality to automatically switching to a local APT software management system software mirror.
 
-#### Accepted values
+Accepted values:
 
 * `false`: Disable functionality
 * `true`: Enable functionality
 
-#### Default value
-
-`true`
+Default value: `true`
 
 ### LEPTONICA_VERSION
 
 Determine [which version of Leptonica](https://github.com/DanBloomberg/leptonica/releases) to build.
 
-#### Accepted values
+Accepted values:
 
-A Leptonica version number that is available from [the Git repository tags](https://github.com/DanBloomberg/leptonica/tags) (without the `v` tag name prefix) or `latest`(detect and build the current upstream latest version).
+* A Leptonica version number that is available from [the Git repository tags](https://github.com/DanBloomberg/leptonica/tags) (without the `v` tag name prefix)
+* `latest`(detect and build the current upstream latest version).
 
-#### Default value
-
-`latest`
+Default value: `latest`
 
 ### LEPTONICA_SOURCE_ARCHIVE_URL
 
 Configures the URL to download Leptonica's source archive from.
 
-#### Accepted values
+Accepted values: Any URLs supported by the curl client should work.
 
-Any URLs supported by the curl client should work.
-
-#### Default value
-
-<https://github.com/DanBloomberg/leptonica/releases/download/_LEPTONICA_VERSION_/leptonica-_LEPTONICA_VERSION_.tar.gz>
+Default value: `https://github.com/DanBloomberg/leptonica/releases/download/_LEPTONICA_VERSION_/leptonica-_LEPTONICA_VERSION_.tar.gz`
 
 ### TESSERACT_VERSION
 
 Determine which version of Tesseract to build.
 
-#### Accepted values
+Accepted values:
 
-A Tesseract version number that is available from the Git repository tags (without the `v` tag name prefix) or `latest`(detect and build the current upstream latest version).
+* A Tesseract version number that is available from the Git repository tags (without the `v` tag name prefix)
+* `latest`(detect and build the current upstream latest version).
 
-#### Default value
-
-`latest`
+Default value: `latest`
 
 ### TESSERACT_SOURCE_ARCHIVE_URL
 
 Configures the URL to download Tesseract's source archive from.
 
-#### Accepted values
+Accepted values: Any URLs supported by the curl client should work.
 
-Any URLs supported by the curl client should work.
-
-#### Default value
-
-<https://github.com/tesseract-ocr/tesseract/archive/refs/tags/_TESSERACT_VERSION_.tar.gz>
+Default value: `https://github.com/tesseract-ocr/tesseract/archive/refs/tags/_TESSERACT_VERSION_.tar.gz`
 
 ### TESSERACT_ORANGE_DEBUG
 
 Enables the debugging features for the Tesseract Orange builder, including but not limited to disabling clean up of the temporary directory.
 
-#### Accepted values
+Accepted values:
 
 * `true`: Enable debugging features
 * `false`: Disable debugging features
 
-#### Default value
-
-`false`
+Default value: `false`
 
 ### TESSERACT_ORANGE_PREFIX
 
 Specifies the installation path prefix of the Tesseract Orange installation.
 
-#### Default value
-
-`/opt/tesseract-orange-_TESSERACT_ORANGE_VERSION_`
+Default value: `/opt/tesseract-orange-_TESSERACT_ORANGE_VERSION_`
 
 The `_TESSERACT_ORANGE_VERSION_` placeholder string will be automatically replaced to the distribution version of the Tesseract Orange source.
 
