@@ -165,7 +165,7 @@ case "${distro_id}" in
             "${distro_version}"
 
         case "${distro_version}" in
-            22.04)
+            22.04|23.10)
                 runtime_dependency_pkgs_leptonica_ubuntu2204=(
                     libgif7
                     libjpeg8
