@@ -19,11 +19,6 @@ services:
       - type: bind
         source: ./
         target: /project
-      # Sync timezone preference from the host system
-      - type: bind
-        source: /etc/localtime
-        target: /etc/localtime
-        read_only: true
       # For determining the hostname part of the distribution package
       - type: bind
         source: /etc/hostname
@@ -35,3 +30,7 @@ services:
       - https_proxy
       - HTTP_PROXY
       - HTTPS_PROXY
+
+      # Set this environment variable to your local timezone settings
+      # for proper operation timestamp
+      #- TZ=CST-8
