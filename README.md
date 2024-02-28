@@ -9,7 +9,7 @@ This project features programs that will download, and build a Tesseract OCR sof
 
 ## Features
 
-Here are some prominent features of this product that worth noticing:
+Here are some prominent features of this product that worth noting:
 
 * The build is run in a Docker container, thus will not pollute your host system
 * No files will be installed in the standard system paths, thus your runtime environment will also not be polluted, the installation can be easily cleaned up when not used
