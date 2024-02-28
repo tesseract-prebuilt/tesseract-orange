@@ -39,7 +39,7 @@ This section documents the prerequisites of the product building container:
 
 ### APT_SWITCH_LOCAL_MIRROR
 
-Whether to enable the functionality to automatically switching to a local APT software management system software mirror
+Whether to enable the functionality to automatically switching to a local APT software management system software mirror.
 
 #### Accepted values
 
