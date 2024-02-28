@@ -35,6 +35,77 @@ This section documents the prerequisites of the product building container:
   The runtime interpreter of the build program.  **Requires version >= 4.3**(name reference variable support to be specific).
 * A supported operating system image that is the same/compatible with the builder host's system, currently supporting Ubuntu 22.04/23.10.  This product is designed with cross-platform compatibility in mind thus it may be possible to port it to other Linux distributions as well, patches welcome!
 
+## How to use
+
+1. Download the tesseract-orange-_X_._Y_._Z_.tar.gz release package from [the project's Releases page](https://gitlab.com/tesseract-prebuilt/tesseract-orange/-/releases).
+1. Extract the downloaded release package.
+1. Edit [the docker-compose.yaml Docker Compose configuration file](docker-compose.yaml) to change the container image of the `builder` service to match the same version of your build host.
+1. Launch a text terminal application.
+1. Run the following command to change the working directory to the release package extraction directory:
+
+    ```bash
+    cd /path/to/tesseract-orange-X.Y.Z
+    ```
+
+1. Run the following command _as the superuser_ to launch the product builder container:
+
+    ```bash
+    sudo docker compose up -d
+    ```
+
+   Note that superuser privilege may be optional if you've configure your user to be in the `docker` group.
+1. Run the following command _as the superuser_ to start the product build program:
+
+    ```bash
+    sudo docker exec tesseract-orange-builder /product/build.sh
+    ```
+
+   If the build ended successfully you should be able to locate the tesseract-orange-_VERSION_-t_TESSERACT_VERSION_-for-_HOSTNAME_.tar.xz built deployment package at the current working directory.
+
+   You may acquire a in-container interactive session by running the following command _as the superuser_ to have more control to the builder environment:
+
+    ```bash
+    docker_exec_opts=(
+        # Enable the standard input device for interactive session
+        --interactive
+
+        # Emulate an teletype terminal to allow proper execution of the
+        # in-container shell
+        --tty
+    )
+    sudo docker exec "${docker_exec_opts[@]}" tesseract-orange-builder \
+        bash --login
+    ```
+
+1. Extract the built deployment package by running the following command:
+
+    ```bash
+    tar_opts=(
+        # Extract specified archive
+        --extract
+
+        # Specify archive to operate
+        --file=tesseract-orange-_VERSION_-t_TESSERACT_VERSION_-for-_HOSTNAME_.tar.xz
+
+        # Print extracting archive member
+        --verbose
+    )
+    if ! tar "${tar_opts[@]}"; then
+        printf \
+            'Error: Deployment package extraction failed.\n' \
+            1>&2
+    fi
+    ```
+
+1. Run the product installer in the extracted deployment package _as the superuser(root)_:
+
+    ```bash
+    /path/to/tesseract-orange-_VERSION_-t_TESSERACT_VERSION_-for-_HOSTNAME_/install.sh
+    ```
+
+   <!-- markdownlint-disable-next-line no-space-in-emphasis -->
+   After the installation is finished you should be able to locate the built software in the /opt/tesseract-orange-_VERSION_-t&#8288;_TESSERACT_VERSION_-for-_HOSTNAME_ directory.  To allow easy access to the built executables you may want to add the /opt/tesseract-orange-_VERSION_-t&#8288;_TESSERACT_VERSION_-for-_HOSTNAME_/bin directory to your command search PATHs.
+
 ## Environment variables that can change the prodoct builder's behaviors
 
 ### APT_SWITCH_LOCAL_MIRROR
@@ -150,6 +221,8 @@ Here are some third-party resources that are referenced during the development o
   Explains how to enable the multi-threading functionality of the `xz` program to cut down deployment package creation time.
 * [ENVIRONMENT: man xz (1): Compress or decompress .xz and .lzma files](https://manpages.org/xz#environment)  
   Explains the differences between the `XZ_OPT` and `XZ_DEFAULTS` environment variables.
+* [html - Zero-width non-breaking space - Stack Overflow](https://stackoverflow.com/questions/11392312/zero-width-non-breaking-space)  
+  Explains the usage of the `&#8288;` Word-Joiner HTML entity.
 
 ## Licensing
 
