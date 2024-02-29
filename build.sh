@@ -593,11 +593,22 @@ create_deployment_package(){
         # Use multiple threads for compression
         -T0
     )
+    local \
+        pattern_c_include_dir="${tesseract_orange_prefix}/include" \
+        pattern_cmake_config_dir="${tesseract_orange_prefix}/lib/cmake" \
+        pattern_libtool_library_files="${tesseract_orange_prefix}/lib/*.la" \
+        pattern_pkgconfig_dir="${tesseract_orange_prefix}/lib/pkgconfig"
     local -a tar_opts=(
         --create
         --xz
         --verbose
         --file="${product_dir}/${release_id}.tar.xz"
+
+        # Exclude development files
+        --exclude="${pattern_c_include_dir}"
+        --exclude="${pattern_cmake_config_dir}"
+        --exclude="${pattern_libtool_library_files}"
+        --exclude="${pattern_pkgconfig_dir}"
 
         # We don't actually use absolute paths in the dpeloyment package
         # , this is for disabling the default behavior which transforms
