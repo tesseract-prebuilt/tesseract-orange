@@ -485,6 +485,9 @@ configure_tesseract_build(){
         # Don't build unused documentation files to speed up build
         --disable-doc
 
+        # Enable multi-threading
+        --enable-openmp
+
         # Enable experimental OpenCL acceleration
         --enable-opencl
 
