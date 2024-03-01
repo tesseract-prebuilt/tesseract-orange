@@ -175,7 +175,6 @@ case "${distro_id}" in
                     libwebp7
                     zlib1g
                 )
-
                 runtime_dependency_pkgs_tesseract_ubuntu2204=(
                     libarchive13
                     libcairo2
