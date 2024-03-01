@@ -89,5 +89,6 @@
 # Don't track continuous integration virtual environments
 /continuous-integration/venv/
 
-# Dont't track extracted deployment package contents
+# Don't track extracted deployment package contents
 /tesseract-orange-*/
+
