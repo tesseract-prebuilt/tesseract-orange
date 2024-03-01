@@ -6,7 +6,7 @@
 TESSERACT_VERSION="${TESSERACT_VERSION:-latest}"
 TESSERACT_SOURCE_ARCHIVE_URL="${TESSERACT_SOURCE_ARCHIVE_URL:-"https://github.com/tesseract-ocr/tesseract/archive/refs/tags/${TESSERACT_VERSION}.tar.gz"}"
 TESSERACT_ORANGE_DEBUG="${TESSERACT_ORANGE_DEBUG:-false}"
-TESSERACT_ORANGE_PREFIX="${TESSERACT_ORANGE_PREFIX:-/opt/tesseract-orange-_TESSERACT_ORANGE_VERSION_}"
+TESSERACT_ORANGE_PREFIX="${TESSERACT_ORANGE_PREFIX:-/opt/tesseract-orange}"
 
 LEPTONICA_VERSION="${LEPTONICA_VERSION:-latest}"
 LEPTONICA_SOURCE_ARCHIVE_URL="${LEPTONICA_SOURCE_ARCHIVE_URL:-"https://github.com/DanBloomberg/leptonica/releases/download/${LEPTONICA_VERSION}/leptonica-${LEPTONICA_VERSION}.tar.gz"}"
@@ -144,9 +144,49 @@ init(){
             "${tesseract_orange_version}"
     fi
 
+    print_progress 'Determining which Tesseract version to build...'
+    local tesseract_version
+    if test "${TESSERACT_VERSION}" == latest; then
+        if ! query_latest_tesseract_version_ensure_deps; then
+            printf \
+                'Error: Unable to ensure the runtime dependencies for the query_latest_tesseract_version function.\n' \
+                1>&2
+            exit 2
+        fi
+
+        if ! tesseract_version="$(query_latest_tesseract_version)"; then
+            printf \
+                'Error: Unable to query the latest tesseract version.\n' \
+                1>&2
+            exit 2
+        fi
+
+        printf \
+            'Info: Will build current latest version of Tesseract("%s") determined from the GitHub References API response.\n' \
+            "${tesseract_version}"
+    else
+        tesseract_version="${TESSERACT_VERSION}"
+        printf \
+            'Info: Will build version "%s" of Tesseract specified from the TESSERACT_VERSION environment variable.\n' \
+            "${tesseract_version}"
+    fi
+
+    local product_id=tesseract-orange
+    local release_id
+    if ! determine_product_release_id \
+        "${product_id}" \
+        "${tesseract_orange_version}" \
+        "${tesseract_version}" \
+        release_id; then
+        printf \
+            'Error: Unable to determine the product release identifier.\n' \
+            1>&2
+        exit 2
+    fi
+
     print_progress 'Determining the installation prefix path...'
     local tesseract_orange_prefix
-    tesseract_orange_prefix="${TESSERACT_ORANGE_PREFIX//_TESSERACT_ORANGE_VERSION_/"${tesseract_orange_version}"}"
+    tesseract_orange_prefix="${TESSERACT_ORANGE_PREFIX//tesseract-orange/"${release_id}"}"
     printf \
         'Info: Installation prefix path determined to be "%s".\n' \
         "${tesseract_orange_prefix}"
@@ -228,33 +268,6 @@ init(){
         exit 2
     fi
 
-    print_progress 'Determining which Tesseract version to build...'
-    local tesseract_version
-    if test "${TESSERACT_VERSION}" == latest; then
-        if ! query_latest_tesseract_version_ensure_deps; then
-            printf \
-                'Error: Unable to ensure the runtime dependencies for the query_latest_tesseract_version function.\n' \
-                1>&2
-            exit 2
-        fi
-
-        if ! tesseract_version="$(query_latest_tesseract_version)"; then
-            printf \
-                'Error: Unable to query the latest tesseract version.\n' \
-                1>&2
-            exit 2
-        fi
-
-        printf \
-            'Info: Will build current latest version of Tesseract("%s") determined from the GitHub References API response.\n' \
-            "${tesseract_version}"
-    else
-        tesseract_version="${TESSERACT_VERSION}"
-        printf \
-            'Info: Will build version "%s" of Tesseract specified from the TESSERACT_VERSION environment variable.\n' \
-            "${tesseract_version}"
-    fi
-
     local tesseract_source_archive
     if ! acquire_tesseract_source_archive \
         tesseract_source_archive \
@@ -309,8 +322,6 @@ init(){
         "${product_dir}" \
         "${packaging_assets_dir}" \
         "${tesseract_orange_prefix}" \
-        "${tesseract_orange_version}" \
-        "${tesseract_version}" \
         "${temp_dir}"; then
         printf \
             'Error: Unable to create the deployment package.\n' \
@@ -505,8 +516,6 @@ create_deployment_package(){
     local product_dir="${1}"; shift
     local packaging_assets_dir="${1}"; shift
     local tesseract_orange_prefix="${1}"; shift
-    local tesseract_orange_version="${1}"; shift
-    local tesseract_version="${1}"; shift
     local temp_dir="${1}"; shift
 
     print_progress 'Creating the deployment package...'
@@ -536,23 +545,6 @@ create_deployment_package(){
     fi
 
     printf \
-        'Info: Loading the builder host hostname...\n'
-    local \
-        hostname_file=/etc/hostname \
-        builder_host_hostname_file=/etc/hostname.builder-host \
-        builder_host_hostname
-    if test -e "${builder_host_hostname_file}"; then
-        builder_host_hostname="$(<"${builder_host_hostname_file}")"
-    elif test -e "${hostname_file}"; then
-        printf \
-            'Warning: The builder host hostname file does not exist, using current hostname file as a fallback.\n' \
-            1>&2
-        builder_host_hostname="$(<"${hostname_file}")"
-    else
-        builder_host_hostname=unknown
-    fi
-
-    printf \
         'Info: Generating the product installation program from its template...\n'
     local \
         installation_program_template="${packaging_assets_dir}/install.sh.in" \
@@ -579,13 +571,6 @@ create_deployment_package(){
             1>&2
         return 2
     fi
-
-    printf \
-        'Info: Determining the release identifier...\n'
-    local release_id="tesseract-orange-${tesseract_orange_version}-t${tesseract_version}-for-${builder_host_hostname}"
-    printf \
-        'Info: The release identifier determined to be "%s".\n' \
-        "${release_id}"
 
     printf \
         'Info: Creating the deployment package using the tar(1) utility...\n'
@@ -1887,6 +1872,43 @@ extract_software_archive(){
             fi
         done
     fi
+}
+
+# Determine the release identifier for the Tesseract Orange distribution
+#
+# The release identifier identifies the release and is comprised of "${product_id}-${product_version}
+determine_product_release_id(){
+    local product_id="${1}"; shift
+    local product_version="${1}"; shift
+    local tesseract_version="${1}"; shift
+
+    local -n release_id_ref="${1}"; shift
+
+    print_progress \
+        'Determining the release identifier...'
+    printf \
+        'Info: Loading the builder host hostname...\n'
+    local \
+        hostname_file=/etc/hostname \
+        builder_host_hostname_file=/etc/hostname.builder-host \
+        builder_host_hostname
+    if test -e "${builder_host_hostname_file}"; then
+        builder_host_hostname="$(<"${builder_host_hostname_file}")"
+    elif test -e "${hostname_file}"; then
+        printf \
+            'Warning: The builder host hostname file does not exist, using current hostname file as a fallback.\n' \
+            1>&2
+        builder_host_hostname="$(<"${hostname_file}")"
+    else
+        builder_host_hostname=unknown
+    fi
+
+    printf \
+        'Info: Determining the release identifier...\n'
+    release_id_ref="${product_id}-${product_version}-t${tesseract_version}-for-${builder_host_hostname}"
+    printf \
+        'Info: The release identifier determined to be "%s".\n' \
+        "${release_id_ref}"
 }
 
 # Ensure the runtime dependencies for the determine_tesseract_orange_version
