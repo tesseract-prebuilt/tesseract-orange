@@ -92,3 +92,5 @@
 # Don't track extracted deployment package contents
 /tesseract-orange-*/
 
+# Don't track downloaded trained data files for debugging
+/tessdata_*/
