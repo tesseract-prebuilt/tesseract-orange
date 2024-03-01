@@ -135,7 +135,7 @@ init(){
             "${operation_timestamp}"
         )"; then
         printf \
-            'Error: Unabel to determine the Tesseract Orange distribution version string.\n' \
+            'Error: Unable to determine the Tesseract Orange distribution version string.\n' \
             1>&2
         exit 2
     else
