@@ -610,7 +610,7 @@ create_deployment_package(){
         # Convert the installation prefix content
         --transform="s@^$(convert_path_to_regex "${tesseract_orange_prefix}")/@${release_id}/built-product/@x"
 
-        # Convert product installation program
+        # Convert the product installation program
         --transform="s@^$(convert_path_to_regex "${temp_dir}")/@${release_id}/@x"
 
         # Convert the common functions file
