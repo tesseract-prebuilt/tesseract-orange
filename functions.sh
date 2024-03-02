@@ -577,3 +577,52 @@ refresh_apt_local_cache(){
         fi
     fi
 }
+
+# Discard specified number of array members from the start of the
+# specified array and shift further members to the front
+shift_array(){
+    local -n array_ref="${1}"; shift
+
+    local shift_num
+    if test "${#}" -eq 1; then
+        shift_num="${1}"; shift
+    else
+        shift_num=1
+    fi
+
+    if test "${#array_ref[@]}" -eq 0; then
+        printf \
+            '%s: FATAL: The given array has no members.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 99
+    fi
+
+    local regex_zero_or_natural='^(0|[1-9][0-9]*)$'
+    if ! [[ "${shift_num}" =~ ${regex_zero_or_natural} ]]; then
+        printf \
+            '5s: FATAL: Invalid value of the shift_num parameter specified(%s)\n' \
+            "${FUNCNAME[0]}" \
+            "${shift_num}" \
+            1>&2
+        return 99
+    fi
+
+    if test "${#array_ref[@]}" -lt "${shift_num}"; then
+        printf \
+            '%s: FATAL: Invalid shift number has specified(%s).\n' \
+            "${FUNCNAME[0]}" \
+            "${shift_num}" \
+            1>&2
+        return 99
+    fi
+
+    # Unset specified array members
+    local i
+    for(( i = 0; i < shift_num; i = i + 1 )); do
+        unset "array_ref[${i}]"
+    done
+
+    # Regroup array
+    array_ref=("${array_ref[@]}")
+}
