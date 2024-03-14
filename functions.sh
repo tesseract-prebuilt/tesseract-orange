@@ -518,6 +518,14 @@ check_running_user(){
 # Generate or refresh the APT software management system's local cache
 # when necessary
 refresh_apt_local_cache(){
+    if ! check_running_user; then
+        printf \
+            '%s: Error: The running user check has failed.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 1
+    fi
+
     local -a required_commands=(
         # For determining the current time
         date
