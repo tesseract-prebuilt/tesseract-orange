@@ -1323,6 +1323,14 @@ check_runtime_parameters(){
             1>&2
         return 2
     fi
+
+    local regex_boolean_values='^(true|false)$'
+    if ! [[ "${APT_SWITCH_LOCAL_MIRROR}" =~ ${regex_boolean_values} ]]; then
+        printf \
+            "FATAL: The \"APT_SWITCH_LOCAL_MIRROR\" parameter's value can only be either \"true\" or \"false\".\\n" \
+            1>&2
+        exit 99
+    fi
 }
 
 # Determine the type of the specified archive file
