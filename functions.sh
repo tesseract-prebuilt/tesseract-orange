@@ -635,7 +635,10 @@ refresh_apt_local_cache(){
         return 2
     fi
 
-    if test "$((current_time_epoch - apt_archive_cache_mtime_epoch))" -ge 86400; then
+    if test "$((current_time_epoch - apt_archive_cache_mtime_epoch))" -lt 86400; then
+        printf \
+            'Info: The last refresh time is less than 1 day, skipping...\n'
+    else
         printf \
             'Info: Refreshing the APT local package cache...\n'
         if ! apt-get update; then
