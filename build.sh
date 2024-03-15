@@ -43,6 +43,27 @@ init(){
         exit 1
     fi
 
+    print_progress \
+        'Detecting operating system distribution information...'
+    printf \
+        'Info: Querying the operating system distribution identifier...\n'
+    if ! distro_id="$(get_distro_identifier)"; then
+        printf \
+            'Error: Unable to query the operating system distribution identifier.\n' \
+            1>&2
+        exit 2
+    fi
+    printf \
+        'Info: The operating system distribution identifier of this system is "%s".\n' \
+        "${distro_id}"
+
+    if ! refresh_package_manager_local_cache; then
+        printf \
+            'Error: Unable to refresh the package manager local cache.\n' \
+            1>&2
+        exit 2
+    fi
+
     local -a base_runtime_dependency_pkgs=(
         coreutils
     )
@@ -56,11 +77,14 @@ init(){
         fi
     fi
 
-    if ! prepare_software_sources "${APT_SWITCH_LOCAL_MIRROR}"; then
-        printf \
-            'Error: Unable to prepare the software sources.\n' \
-            1>&2
-        exit 2
+    if test "${distro_id}" == ubuntu \
+        && test "${APT_SWITCH_LOCAL_MIRROR}" == true; then
+        if ! switch_local_mirror; then
+            printf \
+                'Error: Unable to switch to use a local software repository mirror.\n' \
+                1>&2
+            return 2
+        fi
     fi
 
     local cache_dir="${script_dir}/cache"

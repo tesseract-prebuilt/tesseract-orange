@@ -114,20 +114,9 @@ check_package_manager_commands(){
     fi
 }
 
-
-prepare_software_sources(){
-    local apt_switch_local_mirror="${1}"; shift
-
-    print_progress 'Preparing software sources...'
-
-    local regex_boolean_values='^(true|false)$'
-    if ! [[ "${apt_switch_local_mirror}" =~ ${regex_boolean_values} ]]; then
-        printf \
-            "%s: FATAL: The \"apt_switch_local_mirror\" function parameter's value can only be either \"true\" or \"false\".\\n" \
-            "${FUNCNAME[0]}" \
-            1>&2
-        exit 99
-    fi
+refresh_package_manager_local_cache(){
+    print_progress \
+        'Refreshing the package manager local cache...'
 
     if ! check_package_manager_commands; then
         printf \
@@ -149,15 +138,56 @@ prepare_software_sources(){
         'Info: The operating system distribution identifier determined to be "%s".\n' \
         "${distro_id}"
 
-    local regex_debian_distro_ids='^(debian|ubuntu)$'
-    if [[ "${distro_id}" =~ ${regex_debian_distro_ids} ]]; then
-        if ! refresh_apt_local_cache; then
+    case "${distro_id}" in
+        centos|fedora|rhel)
+            if ! refresh_yum_local_cache; then
+                printf \
+                    "Error: Unable to refresh the YUM/DNF software management system's local cache.\\n" \
+                    1>&2
+                return 2
+            fi
+        ;;
+        debian|ubuntu)
+            if ! refresh_apt_local_cache; then
+                printf \
+                    "Error: Unable to refresh the APT software management system's local cache.\\n" \
+                    1>&2
+                return 2
+            fi
+        ;;
+        *)
             printf \
-                "Error: Unable to refresh the APT software management system's local cache.\\n" \
+                '%s: Error: The operating system distribution identifier "%s" is not supported.\n' \
+                "${FUNCNAME[0]}" \
+                "${distro_id}" \
                 1>&2
-            return 2
-        fi
+            exit 99
+        ;;
+    esac
+}
+
+switch_local_mirror(){
+    print_progress 'Switching to use the local software repository mirror to minimize pacakge installation time...'
+
+    if ! check_package_manager_commands; then
+        printf \
+            'Error: Package manager command check failed.\n' \
+            1>&2
+        return 1
     fi
+
+    local distro_id
+    printf \
+        'Info: Determining the operating system distribution identifier...\n'
+    if ! distro_id="$(get_distro_identifier)"; then
+        printf \
+            'Error: Unable to determine the operating system distribution identifier.\n' \
+            1>&2
+        return 2
+    fi
+    printf \
+        'Info: The operating system distribution identifier determined to be "%s".\n' \
+        "${distro_id}"
 
     if test -v CI; then
         printf \
@@ -165,9 +195,6 @@ prepare_software_sources(){
     elif test "${distro_id}" != ubuntu; then
         printf \
             'Info: Non-Ubuntu distribution detected, will not attempt to change the software sources.\n'
-    elif test "${apt_switch_local_mirror}" == false; then
-        printf \
-            'Info: The APT_SWITCH_LOCAL_MIRROR environment variable is set to "false", will not attempt to change the software sources.\n'
     else
         local -a mirror_patch_dependency_pkgs=(
             # For sending HTTP request to third-party IP address lookup
