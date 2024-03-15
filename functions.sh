@@ -515,6 +515,40 @@ check_running_user(){
     fi
 }
 
+# Generate or refresh the YUM/DNF software management system's local
+# cache when necessary
+refresh_yum_local_cache(){
+    if ! check_running_user; then
+        printf \
+            '%s: Error: The running user check has failed.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 1
+    fi
+
+    if command -v dnf >/dev/null; then
+        if ! dnf makecache; then
+            printf \
+                'Error: Unable to refresh the DNF local cache.\n' \
+                1>&2
+            return 2
+        fi
+    elif command -v yum >/dev/null; then
+        if ! yum makecache; then
+            printf \
+                'Error: Unable to refresh the YUM local cache.\n' \
+                1>&2
+            return 2
+        fi
+    else
+        printf \
+            '%s: Error: No suitable package manager commands are found.\n' \
+            "${FUNCNAME[0]}" \
+            1>&2
+        return 1
+    fi
+}
+
 # Generate or refresh the APT software management system's local cache
 # when necessary
 refresh_apt_local_cache(){
