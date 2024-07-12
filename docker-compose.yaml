@@ -14,7 +14,7 @@ services:
   builder:
     container_name: tesseract-orange-builder
     hostname: tesseract-orange-builder
-    image: ubuntu:jammy
+    image: ubuntu:noble
     volumes:
       - type: bind
         source: ./
