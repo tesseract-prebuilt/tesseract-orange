@@ -327,6 +327,7 @@ else
         "${built_product_dir}/" \
         "${script_dir}/functions.sh" \
         "${script_dir}/install.sh" \
+        "${script_dir}/install-traineddata.sh" \
         "${TESSERACT_ORANGE_PREFIX}"; then
         printf \
             'Error: Unable to install the product files.\n' \

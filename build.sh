@@ -635,7 +635,10 @@ create_deployment_package(){
         --transform="s@^$(convert_path_to_regex "${tesseract_orange_prefix}")/@${release_id}/built-product/@x"
 
         # Convert the product installation program
-        --transform="s@^$(convert_path_to_regex "${temp_dir}")/@${release_id}/@x"
+        --transform="s@^$(convert_path_to_regex "${temp_dir}/install.sh")@${release_id}/install.sh@x"
+
+        # Convert the traineddata installation program
+        --transform="s@^$(convert_path_to_regex "${packaging_assets_dir}/install-traineddata.sh")@${release_id}/install-traineddata.sh@x"
 
         # Convert the common functions file
         --transform="s@^$(convert_path_to_regex "${product_dir}")/@${release_id}/@x"
@@ -648,7 +651,8 @@ create_deployment_package(){
             "${tar_opts[@]}" \
             "${tesseract_orange_prefix}" \
             "${temp_dir}/install.sh" \
-            "${product_dir}/functions.sh"; then
+            "${product_dir}/functions.sh" \
+            "${packaging_assets_dir}/install-traineddata.sh"; then
         printf \
             'Error: Unable to create the deployment package using the tar(1) utility.\n' \
             1>&2

@@ -207,6 +207,12 @@ Here are some third-party resources that are referenced during the development o
   Explains the differences between the `XZ_OPT` and `XZ_DEFAULTS` environment variables.
 * [html - Zero-width non-breaking space - Stack Overflow](https://stackoverflow.com/questions/11392312/zero-width-non-breaking-space)  
   Explains the usage of the `&#8288;` Word-Joiner HTML entity.
+* [LANGUAGES AND SCRIPTS - tesseract/doc/tesseract.1.asc at main · tesseract-ocr/tesseract](https://github.com/tesseract-ocr/tesseract/blob/main/doc/tesseract.1.asc#languages-and-scripts)  
+  Explains the specifications of the languages and scripts traineddata.
+* [Shell Parameter Expansion (Bash Reference Manual)](https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html)  
+  Explains how to use the shell parameter expansion feature to convert the case of the first English character of the string.
+* [`stat`: Report file or file system status - File space usage - GNU Coreutils Manual](https://www.gnu.org/software/coreutils/manual/html_node/stat-invocation.html)  
+  Explains how to use the `stat` command to query the filesize of a specified file.
 
 ## Licensing
 
