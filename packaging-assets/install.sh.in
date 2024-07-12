@@ -207,6 +207,29 @@ case "${distro_id}" in
                     "${runtime_dependency_pkgs_tesseract_ubuntu2310[@]}"
                 )
             ;;
+            24.04)
+                runtime_dependency_pkgs_leptonica_ubuntu2310=(
+                    libgif7
+                    libjpeg8
+                    libopenjp2-7
+                    libpng16-16
+                    libtiff6
+                    libwebp7
+                    zlib1g
+                )
+                runtime_dependency_pkgs_tesseract_ubuntu2310=(
+                    libarchive13
+                    libcairo2
+                    libcurl4
+                    libicu74
+                    libpango-1.0-0
+                    ocl-icd-libopencl1
+                )
+                runtime_dependency_pkgs+=(
+                    "${runtime_dependency_pkgs_leptonica_ubuntu2310[@]}"
+                    "${runtime_dependency_pkgs_tesseract_ubuntu2310[@]}"
+                )
+            ;;
             *)
                 printf \
                     'Error: The Ubuntu version "%s" on this system is not supported.\n' \
