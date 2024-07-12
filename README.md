@@ -57,7 +57,7 @@ This section documents the prerequisites of the product building container:
 1. Run the following command _as the superuser_ to start the product build program:
 
     ```bash
-    sudo docker exec tesseract-orange-builder /product/build.sh
+    sudo docker exec tesseract-orange-builder /project/build.sh
     ```
 
    If the build ended successfully you should be able to locate the tesseract-orange-_VERSION_-t_TESSERACT_VERSION_-for-_HOSTNAME_.tar.xz built deployment package at the current working directory.
