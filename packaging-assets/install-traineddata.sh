@@ -302,7 +302,7 @@ download_tesseract_traineddata(){
             printf \
                 'Info: Determining the download URL of the "%s" script of the "%s" traineddata set...\n' \
                 "${langauge_or_script}" \
-                "${traineddata_set}"s
+                "${traineddata_set}"
             case "${traineddata_set}" in
                 best)
                     download_url="https://github.com/tesseract-ocr/tessdata_best/raw/main/script/${langauge_or_script}.traineddata"
