@@ -62,7 +62,7 @@ jobs:
           token: ${{ secrets.telegram_bot_api_token_ci }}
           status: ${{ job.status }}
 
-  check-product-build-program-ubuntu-24.04:
+  check-product-build-program-ubuntu-24-04:
     name: Check whether the product build program is runnable
     runs-on: ubuntu-24.04
     env:
@@ -94,7 +94,7 @@ jobs:
           token: ${{ secrets.telegram_bot_api_token_ci }}
           status: ${{ job.status }}
 
-  check-product-build-program-ubuntu-22.04:
+  check-product-build-program-ubuntu-22-04:
     name: Check whether the product build program is runnable
     runs-on: ubuntu-22.04
     env:
