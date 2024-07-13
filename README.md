@@ -1,4 +1,4 @@
-# Tesseract Orange（IN DEVELOPMENT）
+# Tesseract Orange
 
 Provides reproducible Tesseract build optimized for your machine.
 
