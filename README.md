@@ -106,7 +106,7 @@ This section documents the prerequisites of the product building container:
    <!-- markdownlint-disable-next-line no-space-in-emphasis -->
    After the installation is finished you should be able to locate the built software in the /opt/tesseract-orange-_VERSION_-t&#8288;_TESSERACT_VERSION_-for-_HOSTNAME_ directory.  To allow easy access to the built executables you may want to add the /opt/tesseract-orange-_VERSION_-t&#8288;_TESSERACT_VERSION_-for-_HOSTNAME_/bin directory to your command search PATHs.
 
-## Environment variables that can change the prodoct builder's behaviors
+## Environment variables that can change the product builder's behaviors
 
 ### APT_SWITCH_LOCAL_MIRROR
 
