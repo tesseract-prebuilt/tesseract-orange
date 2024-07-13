@@ -62,7 +62,39 @@ jobs:
           token: ${{ secrets.telegram_bot_api_token_ci }}
           status: ${{ job.status }}
 
-  check-product-build-program:
+  check-product-build-program-ubuntu-24.04:
+    name: Check whether the product build program is runnable
+    runs-on: ubuntu-24.04
+    env:
+      CACHE_DIR: ${{ github.workspace }}/cache
+    steps:
+      - name: Check out content from the Git repository
+        uses: actions/checkout@v4
+
+      - name: Configure cache directory cache to speed up continuous integration
+        uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-cache-dir
+          path: ${{ env.CACHE_DIR }}
+
+      - name: >-
+          Patch the sudo security policy so that programs run via sudo
+          will recognize environment variables predefined by GitHub
+        run: sudo ./continuous-integration/patch-github-actions-sudo-security-policy.sh
+
+      - name: Run the product build program
+        run: |
+          sudo ./build.sh
+
+      - name: Send CI result notification to the Telegram channel
+        uses: yanzay/notify-telegram@v0.1.0
+        if: always()
+        with:
+          chat: '@brlin_project_ci_results'
+          token: ${{ secrets.telegram_bot_api_token_ci }}
+          status: ${{ job.status }}
+
+  check-product-build-program-ubuntu-22.04:
     name: Check whether the product build program is runnable
     runs-on: ubuntu-22.04
     env:
