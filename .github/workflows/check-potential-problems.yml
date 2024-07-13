@@ -63,7 +63,7 @@ jobs:
           status: ${{ job.status }}
 
   check-product-build-program-ubuntu-24-04:
-    name: Check whether the product build program is runnable
+    name: Check whether the product build program is runnable (Ubuntu 24.04)
     runs-on: ubuntu-24.04
     env:
       CACHE_DIR: ${{ github.workspace }}/cache
@@ -95,7 +95,7 @@ jobs:
           status: ${{ job.status }}
 
   check-product-build-program-ubuntu-22-04:
-    name: Check whether the product build program is runnable
+    name: Check whether the product build program is runnable (Ubuntu 22.04)
     runs-on: ubuntu-22.04
     env:
       CACHE_DIR: ${{ github.workspace }}/cache
