@@ -124,11 +124,11 @@ init(){
         # Custom environment variable for easier management of data files
         # Not a mispelling
         # shellcheck disable=SC2153
-        tessdata_dir="${TESSDATA_DIR}"
+        tessdata_dir="$(realpath "${TESSDATA_DIR}")"
     elif test -v TESSDATA_PREFIX; then
         # TESSDATA_PREFIX environment variable should be set to the
         # parent directory of “tessdata” directory
-        tessdata_dir="${TESSDATA_PREFIX}/tessdata"
+        tessdata_dir="$(realpath "${TESSDATA_PREFIX}/tessdata")"
     elif test -e "${tesseract_orange_tessdata_dir}"; then
         tessdata_dir="${tesseract_orange_tessdata_dir}"
     else
