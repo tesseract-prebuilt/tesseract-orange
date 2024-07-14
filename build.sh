@@ -495,15 +495,16 @@ configure_tesseract_build(){
 
     printf \
         'Info: Running the Tesseract build configuration program...\n'
-    local cxxflags
-    # Disable debugging symbols
-    cxxflags=-O2
+    local -a cxxflags=(
+        # Disable debugging symbols
+        -O2
 
-    # Optimize according to the build host's specification
-    cxxflags+=' -march=native'
+        # Optimize according to the build host's specification
+        -march=native
+    )
     local -a configure_envs=(
         PKG_CONFIG_PATH="${tesseract_orange_prefix}/lib/pkgconfig"
-        CXXFLAGS="${cxxflags}"
+        CXXFLAGS="${cxxflags[@]}"
     )
     local -a configure_opts=(
         # Specify the installation path prefix
@@ -1066,14 +1067,15 @@ configure_leptonica_build(){
 
     printf \
         'Info: Running the Leptonica build configuration program...\n'
-    local cflags
-    # Disable debugging symbols
-    cflags=-O2
+    local -a cflags=(
+        # Disable debugging symbols
+        -O2
 
-    # Optimize according to the build host's specification
-    cflags+=' -march=native'
+        # Optimize according to the build host's specification
+        -march=native
+    )
     local -a leptonica_configure_envs=(
-        CFLAGS="${cflags}"
+        CFLAGS="${cflags[@]}"
     )
     local -a leptonica_configure_opts=(
         # Specify the installation directory path prefix
