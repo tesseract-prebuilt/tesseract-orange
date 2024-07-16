@@ -504,6 +504,9 @@ configure_tesseract_build(){
 
         # Cut down compilation time with the cost of primary memory usage
         -pipe
+
+        # Enable Link Time Optimization (LTO)
+        -flto
     )
     local -a configure_envs=(
         PKG_CONFIG_PATH="${tesseract_orange_prefix}/lib/pkgconfig"
@@ -1079,6 +1082,9 @@ configure_leptonica_build(){
 
         # Cut down compilation time with the cost of primary memory usage
         -pipe
+
+        # Enable Link Time Optimization (LTO)
+        -flto
     )
     local -a leptonica_configure_envs=(
         CFLAGS="${cflags[*]}"
