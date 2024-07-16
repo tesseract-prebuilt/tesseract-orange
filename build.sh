@@ -501,6 +501,9 @@ configure_tesseract_build(){
 
         # Optimize according to the build host's specification
         -march=native
+
+        # Cut down compilation time with the cost of primary memory usage
+        -pipe
     )
     local -a configure_envs=(
         PKG_CONFIG_PATH="${tesseract_orange_prefix}/lib/pkgconfig"
@@ -1073,6 +1076,9 @@ configure_leptonica_build(){
 
         # Optimize according to the build host's specification
         -march=native
+
+        # Cut down compilation time with the cost of primary memory usage
+        -pipe
     )
     local -a leptonica_configure_envs=(
         CFLAGS="${cflags[*]}"
