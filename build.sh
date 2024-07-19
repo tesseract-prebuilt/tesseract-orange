@@ -2049,6 +2049,19 @@ determine_tesseract_orange_version(){
     local tesseract_orange_version
     local product_git_repository="${product_dir}/.git"
     if test -e "${product_git_repository}"; then
+        # File ownership will not match when the product directory is
+        # mounted into the builder
+        local -a git_config_opts=(
+            --global
+            --add
+        )
+        if ! git config "${git_config_opts[@]}" safe.directory /project; then
+            printf \
+                'Error: Unable to set the safe.directory Git configuration.\n' \
+                1>&2
+            return 2
+        fi
+
         local git_describe_output
         local -a git_opts=(
             # Use product directory as the Git working copy directory
