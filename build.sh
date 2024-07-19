@@ -393,6 +393,7 @@ configure_tesseract_build(){
         autoconf
         automake
         libtool
+        make
 
         # C++ compiler
         g++
@@ -410,6 +411,10 @@ configure_tesseract_build(){
 
         # For image URL processing support
         libcurl4-openssl-dev
+
+        # Miscellaneous
+        ca-certificates
+        git
     )
     case "${distro_id}" in
         debian|ubuntu)

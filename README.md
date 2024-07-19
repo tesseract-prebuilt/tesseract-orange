@@ -213,6 +213,8 @@ Here are some third-party resources that are referenced during the development o
   Explains how to use the shell parameter expansion feature to convert the case of the first English character of the string.
 * [`stat`: Report file or file system status - File space usage - GNU Coreutils Manual](https://www.gnu.org/software/coreutils/manual/html_node/stat-invocation.html)  
   Explains how to use the `stat` command to query the filesize of a specified file.
+* [Installing With Autoconf Tools | Installing Tesseract from Git | tessdoc](https://tesseract-ocr.github.io/tessdoc/Compiling-%E2%80%93-GitInstallation#installing-with-autoconf-tools)  
+  Explains how to build Tesseract using the Autoconf build system.
 
 ## Licensing
 
