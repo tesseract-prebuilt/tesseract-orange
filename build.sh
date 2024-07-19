@@ -410,9 +410,6 @@ configure_tesseract_build(){
 
         # For image URL processing support
         libcurl4-openssl-dev
-
-        # For OpenCL support
-        ocl-icd-opencl-dev
     )
     case "${distro_id}" in
         debian|ubuntu)
@@ -525,9 +522,6 @@ configure_tesseract_build(){
 
         # Enable multi-threading
         --enable-openmp
-
-        # Enable experimental OpenCL acceleration
-        --enable-opencl
 
         # Don't build unused static libraries to speed up build
         --disable-static
