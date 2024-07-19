@@ -33,7 +33,7 @@ This section documents the prerequisites of the product building container:
 
 * GNU Bash  
   The runtime interpreter of the build program.  **Requires version >= 4.3**(name reference variable support to be specific).
-* A supported operating system image that is the same/compatible with the builder host's system, currently supporting Ubuntu 22.04/23.10.  This product is designed with cross-platform compatibility in mind thus it may be possible to port it to other Linux distributions as well, patches welcome!
+* A supported operating system image that is the same/compatible with the builder host's system, currently supporting Ubuntu 22.04/23.10/24.04.  This product is designed with cross-platform compatibility in mind thus it may be possible to port it to other Linux distributions as well, patches welcome!
 
 ## How to use
 
