@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 # Common functions
 #
-# Copyright 2024 林博仁 <buo.ren.lin@gmail.com>
+# Copyright 2025 林博仁(Buo-ren Lin) <buo.ren.lin@gmail.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 # print progress report message with additional styling
