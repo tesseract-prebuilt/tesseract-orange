@@ -673,7 +673,7 @@ shift_array(){
     local regex_zero_or_natural='^(0|[1-9][0-9]*)$'
     if ! [[ "${shift_num}" =~ ${regex_zero_or_natural} ]]; then
         printf \
-            '5s: FATAL: Invalid value of the shift_num parameter specified(%s)\n' \
+            '%s: FATAL: Invalid value of the shift_num parameter specified(%s)\n' \
             "${FUNCNAME[0]}" \
             "${shift_num}" \
             1>&2
